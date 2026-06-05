@@ -1,0 +1,93 @@
+{
+  "_meta": {
+    "version": "0.1.0",
+    "lastUpdated": "2026-05-06",
+    "source": "Portafolio de Servicios Reviá 2026",
+    "note": "Fuente única de tratamientos. Cualquier página, card, filtro o búsqueda lee de aquí. NO duplicar este contenido en componentes."
+  },
+  "categories": [
+    {
+      "id": "no-invasivos-corporal",
+      "name": "Rejuvenecimiento Corporal",
+      "palette": "warm",
+      "treatments": [
+        {
+          "id": "anti-celulitis",
+          "name": "Protocolo Anti-Celulitis",
+          "summary": "Técnicas no invasivas para reducir la apariencia de la celulitis y acumulaciones de grasa.",
+          "outcome": "Piel más firme y uniforme.",
+          "bodyZones": ["muslos", "gluteos", "abdomen"]
+        },
+        {
+          "id": "moldeado-corporal",
+          "name": "Moldeado Corporal",
+          "summary": "Combinación de tecnologías para reducir grasa localizada.",
+          "bodyZones": ["abdomen", "flancos", "espalda"]
+        }
+      ]
+    },
+    {
+      "id": "no-invasivos-facial",
+      "name": "Rejuvenecimiento Facial",
+      "palette": "warm",
+      "treatments": [
+        { "id": "limpieza-facial", "name": "Limpieza Facial", "summary": "Mantén tu piel sana y libre de impurezas.", "bodyZones": ["rostro-completo"] },
+        { "id": "bioenzimas", "name": "Bioenzimas y Enzimas Recombinantes", "summary": "Reafirman piel del rostro y cuello, reducen grasa en papada.", "bodyZones": ["papada", "cuello"] },
+        { "id": "terapia-biologica", "name": "Terapia Biológica", "summary": "Sueros intravenosos con vitaminas y minerales.", "bodyZones": ["sistemico"] },
+        { "id": "toxina-botulinica", "name": "Toxina Botulínica", "summary": "Relaja músculos faciales para eliminar arrugas sin comprometer expresión.", "bodyZones": ["frente", "entrecejo", "patas-de-gallo"] },
+        { "id": "toxina-anti-sudoracion", "name": "Toxina Anti-Sudoración", "summary": "Bloquea glándulas sudoríparas para controlar sudoración excesiva.", "bodyZones": ["axilas", "manos"] },
+        { "id": "acido-hialuronico", "name": "Ácido Hialurónico", "summary": "Relleno facial seguro que corrige surcos profundos y rejuvenece labios.", "bodyZones": ["labios", "surcos-naso", "ojeras"] },
+        { "id": "bioestimuladores", "name": "Bioestimuladores de Colágeno", "summary": "Estimulan el colágeno natural rejuveneciendo la piel.", "bodyZones": ["rostro-completo"] },
+        { "id": "rejuvenecimiento-360", "name": "Rejuvenecimiento Facial 360", "summary": "Mejora textura, elimina flacidez, manchas, arrugas e imperfecciones. Luce 10 años más joven, de forma no invasiva.", "bodyZones": ["rostro-completo"] },
+        { "id": "radiofrecuencia-fraccionada", "name": "Radiofrecuencia Fraccionada", "summary": "Reafirma rostro y cuello.", "bodyZones": ["rostro-completo", "cuello"] },
+        { "id": "blefaroplastia-no-invasiva", "name": "Blefaroplastia No Invasiva", "summary": "Elimina exceso de piel en párpados, reduce arrugas y reafirma contorno de ojos.", "bodyZones": ["parpados"] },
+        { "id": "prp", "name": "Plasma Rico en Plaquetas", "summary": "Inyección intradérmica de factores de crecimiento que restaura vitalidad cutánea.", "bodyZones": ["rostro-completo", "cuello", "manos", "cuero-cabelludo"] }
+      ]
+    },
+    {
+      "id": "implante-capilar",
+      "name": "Implante Capilar",
+      "palette": "warm",
+      "headline": "Tu cabello, una obra médica de arte",
+      "treatments": [
+        { "id": "dhi-zafiro", "name": "Técnica DHI y Zafiro", "summary": "Implante Capilar Directo (DHI). Cero dolor, cero cicatrices visibles, técnica sin rasurado disponible.", "bodyZones": ["cuero-cabelludo"] }
+      ]
+    },
+    {
+      "id": "antienvejecimiento",
+      "name": "Programa Antienvejecimiento",
+      "palette": "cool",
+      "treatments": [
+        { "id": "vitamina-c", "name": "Terapia con Vitamina C de alta concentración", "summary": "Antioxidante potente, protección y reparación tisular.", "bodyZones": ["sistemico"] },
+        { "id": "nad", "name": "Terapia con NAD", "summary": "Nicotinamida Adenina Dinucleótido. Producción de energía celular y reparación de ADN.", "bodyZones": ["sistemico"] },
+        { "id": "celulas-madre", "name": "Células Madre", "summary": "Potencial regenerativo para reparación tisular.", "bodyZones": ["sistemico"] },
+        { "id": "exosomas", "name": "Exosomas", "summary": "Señales de rejuvenecimiento al organismo.", "bodyZones": ["sistemico", "rostro-completo"] }
+      ]
+    },
+    {
+      "id": "longevidad-bienestar",
+      "name": "Unidad de Bienestar, Nutrición Sostenible y Longevidad",
+      "palette": "cool",
+      "headline": "Redefiniendo tu edad biológica",
+      "pilares": ["Nutrición", "Actividad Física", "Sueño", "Manejo del Estrés", "Carga Tóxica", "Conexiones"],
+      "treatments": [
+        { "id": "exomind", "name": "Neuro-Reset con EXOMIND", "summary": "Estimulación magnética transcraneal. Sesiones de 25 min sin dolor, sin agujas, sin recuperación. Reduce ansiedad, mejora sueño profundo, eleva claridad mental.", "bodyZones": ["sistemico"] },
+        { "id": "fuego-y-hielo", "name": "Circuito de Contraste (Fuego y Hielo)", "summary": "Sauna seco + cold plunges. Potencia dopamina y resiliencia.", "bodyZones": ["sistemico"] },
+        { "id": "flotacion", "name": "Cápsulas de Flotación", "summary": "Agua ultrasaturada con sales de Epsom. Apaga el cortisol.", "bodyZones": ["sistemico"] },
+        { "id": "exilis", "name": "Medicina Regenerativa con Exilis", "summary": "Terapias biológicas con exosomas + equipos de última generación.", "bodyZones": ["rostro-completo"] },
+        { "id": "caminadoras-subacuaticas", "name": "Caminadoras Subacuáticas", "summary": "Resistencia del agua, protección articular al 100%.", "bodyZones": ["sistemico"] }
+      ],
+      "membresias": ["Salud Funcional", "Recuperación Ejecutiva", "Biohacker Élite"]
+    },
+    {
+      "id": "complementarios",
+      "name": "Programas Complementarios",
+      "palette": "cool",
+      "treatments": [
+        { "id": "vascular", "name": "Portafolio Vascular en Estética", "summary": "Diagnóstico y manejo de alteraciones vasculares por especialista en Cirugía Vascular y Angiología.", "bodyZones": ["piernas"] },
+        { "id": "sobrepeso", "name": "Programa de Manejo de Sobrepeso y Obesidad", "summary": "Equipo multidisciplinario para cambios sostenibles en estilo de vida.", "bodyZones": ["sistemico"] },
+        { "id": "sueno", "name": "Programa de Sueño", "summary": "Diagnóstico y manejo de alteraciones del sueño con expertos aliados.", "bodyZones": ["sistemico"] }
+      ]
+    }
+  ]
+}

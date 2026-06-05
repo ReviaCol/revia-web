@@ -1,0 +1,10 @@
+// Helper de typecheck — Reviá Web.
+// Igual que tsconfig.json pero EXCLUYE .next (los tipos generados por `next dev`
+// a veces quedan truncados/stale en el folder montado y bloquean el análisis).
+// Uso:  npx tsc -p tsconfig.verify.json --noEmit
+// Puedes borrarlo si no lo necesitas; no afecta el build (`next build` usa tsconfig.json).
+{
+  "extends": "./tsconfig.json",
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", ".next"]
+}
