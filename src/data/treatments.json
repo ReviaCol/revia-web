@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "0.1.0",
-    "lastUpdated": "2026-05-06",
+    "lastUpdated": "2026-07-07",
     "source": "Portafolio de Servicios Reviá 2026",
     "note": "Fuente única de tratamientos. Cualquier página, card, filtro o búsqueda lee de aquí. NO duplicar este contenido en componentes."
   },
@@ -46,11 +46,20 @@
     },
     {
       "id": "implante-capilar",
-      "name": "Implante Capilar",
+      "name": "Unidad Capilar",
       "palette": "warm",
       "headline": "Tu cabello, una obra médica de arte",
       "treatments": [
-        { "id": "dhi-zafiro", "name": "Técnica DHI y Zafiro", "summary": "Implante Capilar Directo (DHI). Cero dolor, cero cicatrices visibles, técnica sin rasurado disponible.", "bodyZones": ["cuero-cabelludo"] }
+        { "id": "nutri-fol", "name": "Reviá NUTRI-FOL", "summary": "Mesoterapia multivitamínica intensiva que nutre el folículo en profundidad y da soporte metabólico y hormonal al cuero cabelludo. Un tratamiento no invasivo, pensado para caída severa o crónica.", "outcome": "Un ciclo de crecimiento más fuerte, desde la raíz.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "prp-capilar", "name": "Plasma Rico Potenciado (PRP)", "summary": "Plasma rico potenciado con factores de crecimiento de tu propia sangre. Mejora la vascularización del cuero cabelludo y estimula la regeneración natural del folículo, en un protocolo personalizado y no invasivo.", "outcome": "Regeneración natural, escrita en tu propia biología.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "foli-activ", "name": "Reviá FOLI-ACTIV", "summary": "Terapia lumínica médica (LLLT) que estimula la microcirculación del cuero cabelludo y activa el metabolismo del folículo. No invasiva, potencia los resultados de los demás tratamientos capilares.", "outcome": "Más irrigación y energía para cada folículo.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "plasma-boost", "name": "Reviá PLASMA-BOOST", "summary": "Plasma rico en plaquetas de alta concentración que estimula la irrigación del folículo y reactiva su fase de crecimiento. Mejora la calidad y el grosor del cabello y frena la caída activa.", "outcome": "Cabello más grueso y una caída que se detiene.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "regen-ex", "name": "Reviá REGEN-EX", "summary": "PRP potenciado con exosomas y células madre (Tecnología MTC) para reactivar folículos miniaturizados y potenciar la regeneración celular. Indicado en caída moderada a avanzada.", "outcome": "Densidad y vitalidad devueltas al cabello.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "dhi-zafiro", "name": "Técnica DHI y Zafiro", "summary": "Implante capilar directo (DHI) con micropuntas de zafiro: colocación folículo a folículo que respeta el ángulo, la dirección y la densidad natural. Cero dolor, cero cicatrices visibles y técnica sin rasurado disponible.", "outcome": "Una línea capilar que se ve —y se siente— tuya.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "microinjerto-fue", "name": "Micro-injerto Capilar F.U.E.", "summary": "Redistribución folicular unidad por unidad con técnica F.U.E.: microimplante pelo a pelo con diseño personalizado según tus rasgos, apoyo de cámara hiperbárica y acompañamiento post-procedimiento. Ambulatorio y no invasivo.", "outcome": "Cobertura natural, diseñada a la medida de tu rostro.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "densificacion-non-shaven", "name": "Densificación Capilar Non-Shaven", "summary": "Densificación capilar con técnica F.U.E. Non-Shaven, sin rapar: microimplante selectivo y preciso pensado para mujeres que buscan discreción total y continuidad en su vida profesional y social.", "outcome": "Más densidad, sin que nadie note el proceso.", "bodyZones": ["cuero-cabelludo"] },
+        { "id": "restauracion-barba", "name": "Restauración de Barba", "summary": "Microimplante folicular para corregir zonas despobladas de la barba con definición estética y un resultado simétrico y natural. Procedimiento ambulatorio y no invasivo.", "outcome": "Una barba densa y homogénea, con tu propio vello.", "bodyZones": ["barba"] },
+        { "id": "restauracion-cejas", "name": "Restauración de Cejas", "summary": "Diseño personalizado y microimplante pelo a pelo para recuperar el marco de la mirada, respetando la angulación natural de cada ceja.", "outcome": "Cejas definidas que enmarcan tu expresión.", "bodyZones": ["cejas"] }
       ]
     },
     {

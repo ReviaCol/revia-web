@@ -31,11 +31,13 @@ export const CATEGORIES = data.categories as unknown as Category[];
 export const CATEGORY_SLUG_TO_ID: Record<string, string> = {
   corporal: "no-invasivos-corporal",
   facial: "no-invasivos-facial",
+  capilar: "implante-capilar",
 };
 
 export const CATEGORY_ID_TO_SLUG: Record<string, string> = {
   "no-invasivos-corporal": "corporal",
   "no-invasivos-facial": "facial",
+  "implante-capilar": "capilar",
 };
 
 export function getCategoryById(id: string): Category | undefined {

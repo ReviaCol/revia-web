@@ -5,6 +5,8 @@ import { PageHero } from "@/components/page/PageHero";
 import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
+import { TreatmentList } from "@/app/tratamientos/[categoria]/_components/TreatmentList";
+import { getCategoryBySlug } from "@/lib/treatments";
 
 export const metadata: Metadata = {
   title: "Implante capilar — Reviá",
@@ -79,12 +81,13 @@ const FAQ_ITEMS = [
 ];
 
 export default function ImplanteCapilarPage() {
+  const capilar = getCategoryBySlug("capilar");
   return (
     <>
       <SiteNav current="/tratamientos" />
       <main id="contenido">
         <PageHero
-          eyebrow="Implante capilar"
+          eyebrow="Unidad Capilar"
           title="Tu cabello, una obra médica de arte."
           accent="obra médica de arte"
           subtitle="Un tratamiento capilar no invasivo, diseñado con la precisión de la medicina y la sensibilidad del arte. Sin dolor, sin marcas visibles, con resultados que se sienten tuyos."
@@ -101,6 +104,42 @@ export default function ImplanteCapilarPage() {
           pillars={STEPS}
           background="var(--revia-cream-100)"
         />
+        <section
+          aria-label="Tratamientos capilares"
+          className="relative z-[2]"
+          style={{ padding: "var(--section-y-tight) var(--gutter) 0" }}
+        >
+          <header className="max-w-[720px]">
+            <p
+              className="font-body inline-flex items-center m-0 mb-6 uppercase"
+              style={{ fontSize: "12px", letterSpacing: "0.2em", gap: "14px", color: "var(--revia-coffee-700)" }}
+            >
+              <span
+                aria-hidden="true"
+                className="block"
+                style={{ width: "28px", height: "1px", background: "var(--revia-accent)" }}
+              />
+              El menú capilar
+            </p>
+            <h2
+              className="font-display font-medium m-0"
+              style={{ fontSize: "clamp(30px, 4vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.012em", color: "var(--revia-coffee-900)" }}
+            >
+              Del diagnóstico a la restauración.
+            </h2>
+            <p
+              className="font-body m-0 mt-6"
+              style={{ fontSize: "15px", lineHeight: 1.7, color: "var(--revia-coffee-700)", maxWidth: "560px" }}
+            >
+              Un camino no invasivo que empieza por entender tu caso y activa, paso
+              a paso, la biología de tu cabello — de la bioestimulación a la
+              restauración folicular.
+            </p>
+          </header>
+        </section>
+        {capilar ? (
+          <TreatmentList treatments={capilar.treatments} categorySlug="capilar" />
+        ) : null}
         <FAQ
           heading="La verdad sobre tu implante."
           items={FAQ_ITEMS}

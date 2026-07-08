@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const SERVICES = [
   { id: "no-invasivos-corporal", name: "Rejuvenecimiento Corporal" },
   { id: "no-invasivos-facial", name: "Rejuvenecimiento Facial" },
-  { id: "implante-capilar", name: "Implante Capilar" },
+  { id: "implante-capilar", name: "Unidad Capilar" },
   { id: "antienvejecimiento", name: "Antienvejecimiento" },
   { id: "longevidad-bienestar", name: "Longevidad & Bienestar" },
   { id: "complementarios", name: "Programas Complementarios" },

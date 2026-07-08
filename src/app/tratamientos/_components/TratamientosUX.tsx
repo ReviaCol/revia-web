@@ -51,8 +51,17 @@ const TREATMENTS: Treatment[] = [
   { cat: "facial", name: "Radiofrecuencia Fraccionada" },
   { cat: "facial", name: "Blefaroplastia No Invasiva" },
   { cat: "facial", name: "Plasma Rico en Plaquetas" },
-  // Implante Capilar
+  // Unidad Capilar
+  { cat: "capilar", name: "Reviá NUTRI-FOL" },
+  { cat: "capilar", name: "Plasma Rico Potenciado (PRP)" },
+  { cat: "capilar", name: "Reviá FOLI-ACTIV" },
+  { cat: "capilar", name: "Reviá PLASMA-BOOST" },
+  { cat: "capilar", name: "Reviá REGEN-EX" },
   { cat: "capilar", name: "Técnica DHI y Zafiro" },
+  { cat: "capilar", name: "Micro-injerto Capilar F.U.E." },
+  { cat: "capilar", name: "Densificación Capilar Non-Shaven" },
+  { cat: "capilar", name: "Restauración de Barba" },
+  { cat: "capilar", name: "Restauración de Cejas" },
   // Programa Antienvejecimiento
   { cat: "antiedad", name: "Terapia con Vitamina C de alta concentración" },
   { cat: "antiedad", name: "Terapia con NAD" },
@@ -73,7 +82,7 @@ const TREATMENTS: Treatment[] = [
 const CAT_LABEL: Record<CategoryId, string> = {
   corporal: "Rejuvenecimiento Corporal",
   facial: "Rejuvenecimiento Facial",
-  capilar: "Implante Capilar",
+  capilar: "Unidad Capilar",
   antiedad: "Programa Antienvejecimiento",
   longevidad: "Unidad de Bienestar, Nutrición Sostenible y Longevidad",
   complementarios: "Programas Complementarios",

@@ -190,12 +190,12 @@ export default function HomePage() {
               >
                 <ImageSlot
                   slot="trat-implante"
-                  alt="Implante capilar"
+                  alt="Unidad Capilar"
                   tone="dark"
                 />
                 <div className="veil" />
                 <div className="tc-in">
-                  <h3>Implante capilar</h3>
+                  <h3>Unidad Capilar</h3>
                   <p className="tc-sum">
                     DHI y zafiro. Sin cicatrices visibles.
                   </p>

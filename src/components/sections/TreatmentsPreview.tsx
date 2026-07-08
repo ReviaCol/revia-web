@@ -43,7 +43,7 @@ const TREATMENT_CARDS: ReadonlyArray<TreatmentCard> = [
   },
   {
     number: "03",
-    title: "Implante capilar",
+    title: "Unidad Capilar",
     summary: "DHI y zafiro · cero cicatrices visibles",
     href: "/implante-capilar",
     bg: "var(--revia-coffee-900)",

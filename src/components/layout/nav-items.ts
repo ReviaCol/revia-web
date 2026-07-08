@@ -38,7 +38,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     menu: [
       { href: "/tratamientos/corporal", label: "Corporal" },
       { href: "/tratamientos/facial", label: "Facial" },
-      { href: "/implante-capilar", label: "Implante Capilar" },
+      { href: "/implante-capilar", label: "Unidad Capilar" },
       { href: "/antienvejecimiento", label: "Antienvejecimiento" },
     ],
   },

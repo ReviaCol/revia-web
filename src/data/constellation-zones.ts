@@ -123,7 +123,7 @@ const ROSTRO: MapDef = {
       eyebrow: "Zona I · Cuero cabelludo", coord: "23°N · 14°E",
       title: ["Cuero", "cabelludo"],
       sub: "Donde el cabello vuelve a su densidad. Restauramos sin marcas, a tu ritmo.",
-      treatmentIds: ["dhi-zafiro", "prp"],
+      treatmentIds: ["regen-ex", "plasma-boost", "dhi-zafiro"],
     },
     {
       id: "frente-rostro",

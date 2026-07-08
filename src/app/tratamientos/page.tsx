@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const CATEGORIES = [
   { id: "corporal", n: "01", t: "Corporal", bg: "var(--terra)", tone: "warm" as const },
   { id: "facial", n: "02", t: "Facial", bg: "var(--ink-900)", tone: "dark" as const },
-  { id: "capilar", n: "03", t: "Implante capilar", bg: "var(--ink-900)", tone: "dark" as const },
+  { id: "capilar", n: "03", t: "Unidad Capilar", bg: "var(--ink-900)", tone: "dark" as const },
   { id: "antiedad", n: "04", t: "Antienvejecimiento", bg: "var(--terra)", tone: "warm" as const },
   { id: "longevidad", n: "05", t: "Longevidad", bg: "var(--turq-deep)", tone: "cool" as const, href: "/longevidad" },
   { id: "complementarios", n: "06", t: "Complementarios", bg: "var(--ink-900)", tone: "dark" as const },

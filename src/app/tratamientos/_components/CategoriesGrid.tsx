@@ -61,7 +61,7 @@ const CATEGORIES: ReadonlyArray<Category> = [
   },
   {
     number: "03",
-    title: "Implante capilar",
+    title: "Unidad Capilar",
     summary: "Tu cabello, una obra biológica de arte. DHI y zafiro, sin invasión.",
     treatments: [
       "Técnica DHI",
