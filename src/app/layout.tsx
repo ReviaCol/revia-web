@@ -3,6 +3,8 @@ import { Jost, Manrope } from "next/font/google";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import { medicalClinicJsonLd } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import "./design.css";
 
@@ -72,6 +74,8 @@ export default function RootLayout({
         <a href="#contenido" className="skip-link">Saltar al contenido</a>
         <JsonLd data={medicalClinicJsonLd()} />
         <MotionProvider>{children}</MotionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
