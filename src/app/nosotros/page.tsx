@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
 import { getSpecialties } from "@/lib/equipo";
+import { EquipoMedicos } from "./_components/EquipoMedicos";
 
 export const metadata: Metadata = {
   title: "Nosotros — Reviá",
@@ -103,6 +104,10 @@ export default async function NosotrosPage() {
                 </li>
               ))}
             </ul>
+
+            {/* Médicos (CMS Fase 3, ADR 0017) — complementa las especialidades.
+                No renderiza nada mientras no haya médicos visibles en la DB. */}
+            <EquipoMedicos />
           </div>
         </section>
 

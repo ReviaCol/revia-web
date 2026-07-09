@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { AdminShell } from "../../_components/AdminShell";
 import { parseCredentials, type ActionResult, type MemberRow, type SpecialtyRow } from "../types";
 import {
@@ -118,9 +120,10 @@ export function EquipoBoard({
         </div>
         <div className="adm-note" style={{ marginTop: 14 }}>
           <span>
-            <strong>Aún no se muestran en el sitio.</strong> Se activan cuando haya nombres y
-            fotos reales. La foto se pega como URL por ahora (Supabase Storage llega en Fase 3).
-            No inventes nombres/credenciales ni menciones cirugía.
+            <strong>Aún no se muestran en el sitio.</strong> Se activan al marcar
+            &ldquo;Visible&rdquo; con nombres y fotos reales cargados. Sube la foto con el botón
+            (se guarda en Supabase Storage) o pega una URL. No inventes nombres/credenciales ni
+            menciones cirugía.
           </span>
         </div>
 
@@ -248,9 +251,122 @@ function MemberFields({
         <label>Cita</label>
         <textarea className="adm-input" rows={2} value={quote} onChange={(e) => { setQuote(e.target.value); emit({ quote: e.target.value }); }} />
       </div>
-      <div className="adm-field">
-        <label>Foto (URL, opcional)</label>
-        <input className="adm-input" value={photo} onChange={(e) => { setPhoto(e.target.value); emit({ photo: e.target.value }); }} />
+      <PhotoField
+        photo={photo}
+        onChange={(url) => { setPhoto(url); emit({ photo: url }); }}
+      />
+    </div>
+  );
+}
+
+const PHOTO_BUCKET = "team-photos";
+const MAX_PHOTO_BYTES = 6 * 1024 * 1024; // 6 MB
+
+/**
+ * PhotoField — sube una foto al bucket Supabase Storage `team-photos` (CMS Fase 3,
+ * ADR 0017) con el browser client autenticado, obtiene la URL publica y la
+ * escribe en el campo photo_url del formulario. Conserva el input de URL manual
+ * como fallback + preview de la foto actual.
+ */
+function PhotoField({ photo, onChange }: { photo: string; onChange: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErr("");
+
+    if (!file.type.startsWith("image/")) {
+      setErr("El archivo debe ser una imagen.");
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      setErr("La imagen supera 6 MB. Usa una version mas liviana.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `members/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage
+        .from(PHOTO_BUCKET)
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+      if (error) {
+        setErr(`No se pudo subir: ${error.message}`);
+        return;
+      }
+      const { data } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+      onChange(data.publicUrl);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Error al subir la foto.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="adm-field">
+      <label>Foto</label>
+      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div
+          style={{
+            position: "relative",
+            width: 64,
+            height: 80,
+            flex: "0 0 auto",
+            overflow: "hidden",
+            borderRadius: 4,
+            background: "var(--revia-peach-200, #f2e3da)",
+            border: "1px solid rgba(89,65,60,.14)",
+          }}
+        >
+          {photo && (
+            <Image src={photo} alt="Vista previa" fill sizes="64px" style={{ objectFit: "cover" }} />
+          )}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            disabled={uploading}
+            style={{ display: "none" }}
+          />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="adm-btn adm-btn-outline"
+              disabled={uploading}
+              onClick={() => inputRef.current?.click()}
+            >
+              {uploading ? "Subiendo…" : photo ? "Cambiar foto" : "Subir foto"}
+            </button>
+            {photo && (
+              <button
+                type="button"
+                className="adm-btn adm-btn-ghost"
+                disabled={uploading}
+                onClick={() => onChange("")}
+              >
+                Quitar
+              </button>
+            )}
+          </div>
+          <input
+            className="adm-input"
+            style={{ marginTop: 8 }}
+            placeholder="…o pega una URL de foto"
+            value={photo}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {err && <p className="adm-alert adm-alert-err" style={{ marginTop: 8 }}>{err}</p>}
+        </div>
       </div>
     </div>
   );
