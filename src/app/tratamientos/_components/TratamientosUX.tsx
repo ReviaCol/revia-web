@@ -1,28 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 /**
- * TratamientosUX — vista navegable del catálogo oficial.
+ * TratamientosUX — vista navegable del catálogo oficial (tabs + cards).
  *
- * Los nombres y categorías vienen de `04-content/treatments.json` y
- * `05-src/src/data/treatments.json`. NO incluye duraciones, precios ni
- * promesas de resultado, porque esos datos no están validados con el
- * equipo médico de Reviá (deuda en `08-workflow/debt.md`).
+ * Presentacional: los tratamientos llegan por prop desde el server component
+ * (/tratamientos/page.tsx), que los lee de getCatalog() (Supabase con fallback
+ * al JSON). Antes había una copia hardcodeada aquí — se eliminó al colapsar el
+ * catálogo a una sola fuente (CMS Fase 1, ADR 0014). NO reintroducir listas
+ * literales en este archivo.
+ *
+ * Destino de cada card (decisión de Andres, 2026-07-09):
+ *  - Corporal / Facial / Capilar → ficha /tratamientos/{cat}/{slug}
+ *  - Longevidad → experiencia /longevidad/{slug}
+ *  - Antienvejecimiento → su landing de programa /antienvejecimiento
+ *  - Complementarios → /contacto (aún sin página propia)
  */
 
-type Treatment = {
-  cat: CategoryId;
-  name: string;
-};
-
-type CategoryId =
+export type CategoryId =
   | "corporal"
   | "facial"
   | "capilar"
   | "antiedad"
   | "longevidad"
   | "complementarios";
+
+export type UxTreatment = {
+  cat: CategoryId;
+  id: string;
+  name: string;
+};
 
 const CATEGORIES: { id: CategoryId | "todos"; label: string }[] = [
   { id: "todos", label: "Todos" },
@@ -34,49 +43,13 @@ const CATEGORIES: { id: CategoryId | "todos"; label: string }[] = [
   { id: "complementarios", label: "Complementarios" },
 ];
 
-// Nombres extraídos directo de treatments.json (catálogo oficial)
-const TREATMENTS: Treatment[] = [
-  // Rejuvenecimiento Corporal
-  { cat: "corporal", name: "Protocolo Anti-Celulitis" },
-  { cat: "corporal", name: "Moldeado Corporal" },
-  // Rejuvenecimiento Facial
-  { cat: "facial", name: "Limpieza Facial" },
-  { cat: "facial", name: "Bioenzimas y Enzimas Recombinantes" },
-  { cat: "facial", name: "Terapia Biológica" },
-  { cat: "facial", name: "Toxina Botulínica" },
-  { cat: "facial", name: "Toxina Anti-Sudoración" },
-  { cat: "facial", name: "Ácido Hialurónico" },
-  { cat: "facial", name: "Bioestimuladores de Colágeno" },
-  { cat: "facial", name: "Rejuvenecimiento Facial 360" },
-  { cat: "facial", name: "Radiofrecuencia Fraccionada" },
-  { cat: "facial", name: "Blefaroplastia No Invasiva" },
-  { cat: "facial", name: "Plasma Rico en Plaquetas" },
-  // Unidad Capilar
-  { cat: "capilar", name: "Reviá NUTRI-FOL" },
-  { cat: "capilar", name: "Plasma Rico Potenciado (PRP)" },
-  { cat: "capilar", name: "Reviá FOLI-ACTIV" },
-  { cat: "capilar", name: "Reviá PLASMA-BOOST" },
-  { cat: "capilar", name: "Reviá REGEN-EX" },
-  { cat: "capilar", name: "Técnica DHI y Zafiro" },
-  { cat: "capilar", name: "Micro-injerto Capilar F.U.E." },
-  { cat: "capilar", name: "Densificación Capilar Non-Shaven" },
-  { cat: "capilar", name: "Restauración de Barba" },
-  { cat: "capilar", name: "Restauración de Cejas" },
-  // Programa Antienvejecimiento
-  { cat: "antiedad", name: "Terapia con Vitamina C de alta concentración" },
-  { cat: "antiedad", name: "Terapia con NAD" },
-  { cat: "antiedad", name: "Células Madre" },
-  { cat: "antiedad", name: "Exosomas" },
-  // Unidad de Bienestar, Nutrición Sostenible y Longevidad
-  { cat: "longevidad", name: "Neuro-Reset con EXOMIND" },
-  { cat: "longevidad", name: "Circuito de Contraste (Fuego y Hielo)" },
-  { cat: "longevidad", name: "Cápsulas de Flotación" },
-  { cat: "longevidad", name: "Medicina Regenerativa con Exilis" },
-  { cat: "longevidad", name: "Caminadoras Subacuáticas" },
-  // Programas Complementarios
-  { cat: "complementarios", name: "Portafolio Vascular en Estética" },
-  { cat: "complementarios", name: "Programa de Manejo de Sobrepeso y Obesidad" },
-  { cat: "complementarios", name: "Programa de Sueño" },
+const CAT_ORDER: CategoryId[] = [
+  "corporal",
+  "facial",
+  "capilar",
+  "antiedad",
+  "longevidad",
+  "complementarios",
 ];
 
 const CAT_LABEL: Record<CategoryId, string> = {
@@ -88,22 +61,72 @@ const CAT_LABEL: Record<CategoryId, string> = {
   complementarios: "Programas Complementarios",
 };
 
-export function TratamientosUX() {
+/**
+ * Destino de cada card por categoría. `href` recibe el slug del tratamiento;
+ * las categorías sin ficha individual (antiedad, complementarios) lo ignoran y
+ * mandan a una página fija. `cue` es el texto de la señal de enlace en la card.
+ */
+const DEST_BY_CAT: Record<CategoryId, { href: (slug: string) => string; cue: string }> = {
+  corporal: { href: (slug) => `/tratamientos/corporal/${slug}`, cue: "Conocer el tratamiento" },
+  facial: { href: (slug) => `/tratamientos/facial/${slug}`, cue: "Conocer el tratamiento" },
+  capilar: { href: (slug) => `/tratamientos/capilar/${slug}`, cue: "Conocer el tratamiento" },
+  longevidad: { href: (slug) => `/longevidad/${slug}`, cue: "Conocer la experiencia" },
+  antiedad: { href: () => "/antienvejecimiento", cue: "Ver el programa" },
+  complementarios: { href: () => "/contacto", cue: "Consultar" },
+};
+
+const cueStyle: React.CSSProperties = {
+  marginTop: "auto",
+  paddingTop: "16px",
+  fontFamily: "var(--font-body)",
+  fontWeight: 500,
+  fontSize: "10px",
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "var(--turq-deep)",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+};
+
+function TreatmentCard({ t }: { t: UxTreatment }) {
+  const dest = DEST_BY_CAT[t.cat];
+  return (
+    <Link
+      className="tx-card"
+      href={dest.href(t.id)}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      <span className="tx-chip">No invasivo</span>
+      <h3>{t.name}</h3>
+      <span style={cueStyle}>
+        {dest.cue}
+        <span aria-hidden="true">→</span>
+      </span>
+    </Link>
+  );
+}
+
+export function TratamientosUX({ treatments }: { treatments: UxTreatment[] }) {
   const [active, setActive] = useState<CategoryId | "todos">("todos");
 
-  const counts: Record<string, number> = { todos: TREATMENTS.length };
-  TREATMENTS.forEach((t) => {
+  const counts: Record<string, number> = { todos: treatments.length };
+  treatments.forEach((t) => {
     counts[t.cat] = (counts[t.cat] ?? 0) + 1;
   });
 
-  const groups: { id: CategoryId; label: string; items: Treatment[] }[] = [];
+  const groups: { id: CategoryId; label: string; items: UxTreatment[] }[] = [];
   if (active === "todos") {
-    (["corporal", "facial", "capilar", "antiedad", "longevidad", "complementarios"] as CategoryId[]).forEach((id) => {
-      const items = TREATMENTS.filter((t) => t.cat === id);
+    CAT_ORDER.forEach((id) => {
+      const items = treatments.filter((t) => t.cat === id);
       if (items.length) groups.push({ id, label: CAT_LABEL[id], items });
     });
   } else {
-    groups.push({ id: active, label: CAT_LABEL[active], items: TREATMENTS.filter((t) => t.cat === active) });
+    groups.push({
+      id: active,
+      label: CAT_LABEL[active],
+      items: treatments.filter((t) => t.cat === active),
+    });
   }
 
   return (
@@ -134,10 +157,7 @@ export function TratamientosUX() {
           </div>
           <div className="tx-grid">
             {g.items.map((t) => (
-              <article className="tx-card" key={t.name}>
-                <span className="tx-chip">No invasivo</span>
-                <h3>{t.name}</h3>
-              </article>
+              <TreatmentCard t={t} key={t.id} />
             ))}
           </div>
         </div>

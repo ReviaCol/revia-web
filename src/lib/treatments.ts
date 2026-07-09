@@ -1,10 +1,15 @@
 import data from "@/data/treatments.json";
 
 /**
- * treatments.ts — acceso tipado a la fuente única de tratamientos
- * (src/data/treatments.json). Las páginas de tratamientos, subcategorías y
- * fichas individuales leen de aquí. Sincronizar 04-content/treatments.json y
- * 05-src/src/data/treatments.json al cambiar el catálogo (ver debt.md).
+ * treatments.ts — acceso tipado (SYNC) al catálogo empaquetado
+ * (src/data/treatments.json).
+ *
+ * Desde el CMS Fase 1 (ADR 0014) las superficies públicas leen el catálogo EN VIVO
+ * vía lib/catalog.ts (Supabase con fallback). Este módulo se conserva como:
+ *   1) la FUENTE DEL FALLBACK que usa lib/catalog.ts si la DB falla/está vacía, y
+ *   2) el acceso sync para consumidores que no pueden ser async: leads.ts
+ *      (servicioLabel), seo.ts y sitemap.ts.
+ * src/data/treatments.json es el respaldo; mantenerlo en sync con el seed 0005.
  */
 
 export type Treatment = {

@@ -6,7 +6,7 @@ import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
 import { TreatmentList } from "@/app/tratamientos/[categoria]/_components/TreatmentList";
-import { getCategoryBySlug } from "@/lib/treatments";
+import { getCategoryBySlug } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Implante capilar — Reviá",
@@ -80,8 +80,8 @@ const FAQ_ITEMS = [
   },
 ];
 
-export default function ImplanteCapilarPage() {
-  const capilar = getCategoryBySlug("capilar");
+export default async function ImplanteCapilarPage() {
+  const capilar = await getCategoryBySlug("capilar");
   return (
     <>
       <SiteNav current="/tratamientos" />

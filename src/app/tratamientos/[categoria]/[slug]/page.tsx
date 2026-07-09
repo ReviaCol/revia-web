@@ -9,23 +9,18 @@ import { FAQ } from "@/components/page/FAQ";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_URL, medicalProcedureJsonLd, breadcrumbJsonLd } from "@/lib/seo";
-import {
-  CATEGORY_SLUG_TO_ID,
-  getCategoryBySlug,
-  getTreatmentBySlug,
-} from "@/lib/treatments";
+import { getTreatmentBySlug, getTreatmentParams } from "@/lib/catalog";
 
 function humanizeZone(zone: string): string {
   return zone.replace(/-/g, " ");
 }
 
-export function generateStaticParams() {
-  const params: { categoria: string; slug: string }[] = [];
-  for (const categoria of Object.keys(CATEGORY_SLUG_TO_ID)) {
-    const category = getCategoryBySlug(categoria);
-    category?.treatments.forEach((t) => params.push({ categoria, slug: t.id }));
-  }
-  return params;
+// Catálogo desde Supabase (con fallback al JSON). dynamicParams=true permite que
+// tratamientos nuevos creados en /admin rendericen on-demand sin rebuild.
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return getTreatmentParams();
 }
 
 export async function generateMetadata({
@@ -34,7 +29,7 @@ export async function generateMetadata({
   params: Promise<{ categoria: string; slug: string }>;
 }): Promise<Metadata> {
   const { categoria, slug } = await params;
-  const found = getTreatmentBySlug(categoria, slug);
+  const found = await getTreatmentBySlug(categoria, slug);
   if (!found) return { title: "Tratamiento — Reviá" };
   return {
     title: `${found.treatment.name} — Reviá`,
@@ -61,7 +56,7 @@ export default async function TratamientoDetallePage({
   params: Promise<{ categoria: string; slug: string }>;
 }) {
   const { categoria, slug } = await params;
-  const found = getTreatmentBySlug(categoria, slug);
+  const found = await getTreatmentBySlug(categoria, slug);
   if (!found) notFound();
 
   const { category, treatment } = found;

@@ -4,7 +4,12 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
-import { TratamientosUX } from "./_components/TratamientosUX";
+import { getCatalog } from "@/lib/catalog";
+import {
+  TratamientosUX,
+  type CategoryId,
+  type UxTreatment,
+} from "./_components/TratamientosUX";
 
 export const metadata: Metadata = {
   title: "Tratamientos — Reviá",
@@ -22,12 +27,32 @@ const CATEGORIES = [
   { id: "complementarios", n: "06", t: "Complementarios", bg: "var(--ink-900)", tone: "dark" as const },
 ];
 
+/** Mapea el id de categoría del catálogo (DB/JSON) → id de tab del menú UX. */
+const DB_TO_UX: Record<string, CategoryId> = {
+  "no-invasivos-corporal": "corporal",
+  "no-invasivos-facial": "facial",
+  "implante-capilar": "capilar",
+  antienvejecimiento: "antiedad",
+  "longevidad-bienestar": "longevidad",
+  complementarios: "complementarios",
+};
+
 /**
  * /tratamientos — sin page-hero ni "universos".
  * Entra directo en las cards de categorías (cinematográficas) y luego el
  * menú UX con tabs + cards. (El concepto "Universos" fue retirado.)
+ *
+ * El menú UX se alimenta de getCatalog() (Supabase con fallback al JSON): una
+ * sola fuente, sin lista hardcodeada (CMS Fase 1, ADR 0014).
  */
-export default function TratamientosPage() {
+export default async function TratamientosPage() {
+  const catalog = await getCatalog();
+  const uxTreatments: UxTreatment[] = catalog.flatMap((c) => {
+    const cat = DB_TO_UX[c.id];
+    if (!cat) return [];
+    return c.treatments.map((t) => ({ cat, id: t.id, name: t.name }));
+  });
+
   return (
     <>
       <SiteNav variant="solid" />
@@ -104,7 +129,7 @@ export default function TratamientosPage() {
                 Cada tratamiento, una forma de <em>revelarte</em>.
               </h2>
             </div>
-            <TratamientosUX />
+            <TratamientosUX treatments={uxTreatments} />
           </div>
         </section>
 
