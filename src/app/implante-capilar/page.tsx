@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/page/PageHero";
 import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
+import { getFaqs } from "@/lib/faqs";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
 import { TreatmentList } from "@/app/tratamientos/[categoria]/_components/TreatmentList";
 import { getCategoryBySlug } from "@/lib/catalog";
@@ -57,31 +58,10 @@ const STEPS = [
   },
 ];
 
-const FAQ_ITEMS = [
-  {
-    q: "¿Es un proceso doloroso?",
-    a: "Aplicamos anestesia local para que la experiencia sea cómoda. La mayoría de las personas describe molestias mínimas durante y después del tratamiento.",
-  },
-  {
-    q: "¿Cuándo veré resultados?",
-    a: "El cabello implantado suele caer en las primeras semanas (es esperado) y comienza a crecer de forma estable a partir del tercer o cuarto mes. El resultado pleno se aprecia entre los 9 y 12 meses.",
-  },
-  {
-    q: "¿Necesito rasurarme la cabeza?",
-    a: "No necesariamente. Ofrecemos técnica sin rasurado (non-shaven) cuando tu caso lo permite, para que puedas retomar tu vida con discreción.",
-  },
-  {
-    q: "¿El cabello implantado se vuelve a caer?",
-    a: "Los folículos implantados se toman de zonas resistentes a la caída, por lo que tienden a permanecer. Te explicamos con honestidad cómo cuidar el resto de tu cabello.",
-  },
-  {
-    q: "¿Cuánto tiempo toma el tratamiento?",
-    a: "Distribuimos el proceso en dos días para tu comodidad, según la cantidad de folículos a implantar. Lo definimos contigo en la valoración.",
-  },
-];
 
 export default async function ImplanteCapilarPage() {
   const capilar = await getCategoryBySlug("capilar");
+  const faqItems = await getFaqs("implante-capilar");
   return (
     <>
       <SiteNav current="/tratamientos" />
@@ -142,7 +122,7 @@ export default async function ImplanteCapilarPage() {
         ) : null}
         <FAQ
           heading="La verdad sobre tu implante."
-          items={FAQ_ITEMS}
+          items={faqItems}
         />
         <ClosingCTA
           title="Reserva tu evaluación capilar."
