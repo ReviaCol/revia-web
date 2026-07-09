@@ -23,8 +23,8 @@ export const BUSINESS = {
   legalName: "Reviá - Belleza y Vitalidad",
   description:
     "Centro de medicina estética, regenerativa y bienestar en Bogotá. Tratamientos no invasivos.",
-  telephone: "+57 318 827 9094",
-  email: "dra.gonzalez@revia.com.co",
+  telephone: "+57 310 343 8833",
+  email: "admin@revia.com.co",
   streetAddress: "Cra 16 # 86B-52",
   addressLocality: "Bogotá",
   addressRegion: "Bogotá D.C.",

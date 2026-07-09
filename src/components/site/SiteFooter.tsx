@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CONTACT } from "@/lib/contact";
+import { getSiteContact } from "@/lib/site-content";
 
 /**
  * SiteFooter — port del footer del mockup Claude Design.
  * Logo cream + manifiesto + Instagram destacado + 3 columnas + copyright.
  */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const contact = await getSiteContact();
   return (
     <footer className="footer">
       <div className="wrap footer-grid">
@@ -25,7 +26,7 @@ export function SiteFooter() {
           </p>
           <a
             className="fig"
-            href={CONTACT.instagramUrl}
+            href={contact.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -52,7 +53,7 @@ export function SiteFooter() {
             </span>
             <span>
               <span className="k">Síguenos en Instagram</span>
-              <span className="h">@reviatratamientossincirugia</span>
+              <span className="h">{contact.instagramHandle}</span>
             </span>
           </a>
         </div>
@@ -79,13 +80,13 @@ export function SiteFooter() {
           <div className="ct">Contacto</div>
           <ul>
             <li>
-              <Link href="/contacto">{CONTACT.address.split(",")[0]}</Link>
+              <Link href="/contacto">{contact.address.split(",")[0]}</Link>
             </li>
             <li>
-              <a href={CONTACT.telHref}>{CONTACT.telDisplay}</a>
+              <a href={contact.telHref}>{contact.telDisplay}</a>
             </li>
             <li>
-              <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+              <a href={`mailto:${contact.email}`}>{contact.email}</a>
             </li>
           </ul>
         </div>

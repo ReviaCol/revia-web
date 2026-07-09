@@ -4,6 +4,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
+import { getSpecialties } from "@/lib/equipo";
 
 export const metadata: Metadata = {
   title: "Nosotros — Reviá",
@@ -11,16 +12,6 @@ export const metadata: Metadata = {
   description:
     "Tecnología regenerativa no invasiva, un equipo multidisciplinario y 3.560 m² de infraestructura médica.",
 };
-
-// Especialidades oficiales (brand-system.md §9.3 línea 251)
-const ESPECIALIDADES = [
-  "Dermatólogos",
-  "Médicos estéticos",
-  "Nutricionistas",
-  "Especialistas en medicina regenerativa",
-  "Tricólogos",
-  "Especialistas en bienestar y longevidad",
-];
 
 // Tecnologías oficiales — del catálogo y sitemap
 // (Células madre, exosomas, etc. son tratamientos confirmados en treatments.json)
@@ -33,7 +24,8 @@ const TECNOLOGIAS = [
   { n: "VI",  t: "Terapia con NAD" },
 ];
 
-export default function NosotrosPage() {
+export default async function NosotrosPage() {
+  const especialidades = await getSpecialties();
   return (
     <>
       <SiteNav variant="solid" />
@@ -94,7 +86,7 @@ export default function NosotrosPage() {
                 gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
               }}
             >
-              {ESPECIALIDADES.map((e) => (
+              {especialidades.map((e) => (
                 <li
                   key={e}
                   style={{

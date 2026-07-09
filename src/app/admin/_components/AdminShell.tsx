@@ -122,7 +122,7 @@ export function AdminShell({
   action,
   children,
 }: {
-  active: "leads" | "catalogo";
+  active: "leads" | "catalogo" | "contacto" | "home" | "faqs" | "equipo";
   userEmail: string;
   busy?: boolean;
   title?: string;
@@ -151,6 +151,10 @@ export function AdminShell({
             <nav className="adm-nav">
               <Link href="/admin" className={active === "leads" ? "is-active" : ""}>Leads</Link>
               <Link href="/admin/catalogo" className={active === "catalogo" ? "is-active" : ""}>Catálogo</Link>
+              <Link href="/admin/contacto" className={active === "contacto" ? "is-active" : ""}>Contacto</Link>
+              <Link href="/admin/home" className={active === "home" ? "is-active" : ""}>Home</Link>
+              <Link href="/admin/faqs" className={active === "faqs" ? "is-active" : ""}>FAQs</Link>
+              <Link href="/admin/equipo" className={active === "equipo" ? "is-active" : ""}>Equipo</Link>
             </nav>
           </div>
           <div className="adm-top-right">

@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
 import { BookingCta } from "./_components/BookingCta";
 import { ContactFormDesign } from "./_components/ContactFormDesign";
-import { CONTACT } from "@/lib/contact";
+import { getSiteContact, getSiteHours, groupedHours } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Contacto — Reviá",
@@ -28,6 +28,8 @@ export default async function ContactoPage({
   searchParams: Promise<{ service?: string }>;
 }) {
   const params = await searchParams;
+  const contact = await getSiteContact();
+  const hours = await getSiteHours();
   return (
     <>
       <SiteNav variant="solid" />
@@ -87,35 +89,35 @@ export default async function ContactoPage({
                 <div className="contacto-channels">
                   <a
                     className="contacto-channel"
-                    href={CONTACT.whatsappUrl}
+                    href={contact.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <span className="cc-label">WhatsApp</span>
-                    <span className="cc-value">{CONTACT.whatsappDisplay}</span>
+                    <span className="cc-value">{contact.whatsappDisplay}</span>
                     <span aria-hidden="true" className="cc-arrow">→</span>
                   </a>
-                  <a className="contacto-channel" href={CONTACT.telHref}>
+                  <a className="contacto-channel" href={contact.telHref}>
                     <span className="cc-label">Llamar</span>
-                    <span className="cc-value">{CONTACT.telDisplay}</span>
+                    <span className="cc-value">{contact.telDisplay}</span>
                     <span aria-hidden="true" className="cc-arrow">→</span>
                   </a>
                   <a
                     className="contacto-channel"
-                    href={`mailto:${CONTACT.email}`}
+                    href={`mailto:${contact.email}`}
                   >
                     <span className="cc-label">Email</span>
-                    <span className="cc-value">{CONTACT.email}</span>
+                    <span className="cc-value">{contact.email}</span>
                     <span aria-hidden="true" className="cc-arrow">→</span>
                   </a>
                   <a
                     className="contacto-channel"
-                    href={CONTACT.instagramUrl}
+                    href={contact.instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <span className="cc-label">Instagram</span>
-                    <span className="cc-value">@reviatratamientossincirugia</span>
+                    <span className="cc-value">{contact.instagramHandle}</span>
                     <span aria-hidden="true" className="cc-arrow">→</span>
                   </a>
                 </div>
@@ -131,11 +133,11 @@ export default async function ContactoPage({
                 <div className="address-card" style={{ marginTop: 18 }}>
                   <span className="address-mark" aria-hidden="true" />
                   <div>
-                    <div className="address-line1">Cra 16 # 86B-52</div>
-                    <div className="address-line2">Chicó · Bogotá, Colombia</div>
+                    <div className="address-line1">{contact.streetAddress}</div>
+                    <div className="address-line2">{contact.addressLocality}, Colombia</div>
                     <a
                       className="address-link"
-                      href="https://maps.google.com/?q=Cra+16+%23+86B-52,+Bogot%C3%A1,+Colombia"
+                      href={contact.mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -143,6 +145,41 @@ export default async function ContactoPage({
                     </a>
                   </div>
                 </div>
+              </section>
+
+              <section
+                className="contacto-card"
+                aria-label="Horario de atención"
+                data-rev="up"
+                data-delay="260"
+              >
+                <p className="eyebrow">Horario de atención</p>
+                <dl
+                  style={{ margin: "18px 0 0", display: "grid", gap: "10px" }}
+                >
+                  {groupedHours(hours).map((g) => (
+                    <div
+                      key={g.label}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "20px",
+                        fontSize: "15px",
+                      }}
+                    >
+                      <dt style={{ color: "var(--ink-700, #6b5750)" }}>{g.label}</dt>
+                      <dd
+                        style={{
+                          margin: 0,
+                          color: "var(--ink-900, #3a2b26)",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {g.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
               </section>
             </div>
 

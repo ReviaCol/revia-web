@@ -6,6 +6,7 @@ import { PageHero } from "@/components/page/PageHero";
 import { ProseSection } from "@/components/page/ProseSection";
 import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
+import { getFaqs } from "@/lib/faqs";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
 import { getCategoryById } from "@/lib/treatments";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -44,12 +45,6 @@ const SESSION_STEPS = [
   { title: "Integración", body: "Cerramos con un momento de transición para que el efecto se asiente y te lleves la calma contigo." },
 ];
 
-const FAQ_ITEMS = [
-  { q: "¿Necesito preparación previa?", a: "Muy poca. Te damos indicaciones simples al agendar para que aproveches la sesión al máximo." },
-  { q: "¿Con qué frecuencia se recomienda?", a: "Depende de tu objetivo. Lo definimos en tu evaluación de longevidad, con un plan realista y sostenible." },
-  { q: "¿Es para mí?", a: "Si buscas recuperar energía, claridad y equilibrio sin procedimientos invasivos, es muy probable que sí. Te lo confirmamos con honestidad." },
-];
-
 export default async function ExperienciaPage({
   params,
 }: {
@@ -58,6 +53,7 @@ export default async function ExperienciaPage({
   const { experiencia } = await params;
   const exp = getExperience(experiencia);
   if (!exp) notFound();
+  const faqItems = await getFaqs("longevidad");
 
   return (
     <>
@@ -94,7 +90,7 @@ export default async function ExperienciaPage({
           tone="cool"
         />
 
-        <FAQ heading="Preguntas frecuentes." items={FAQ_ITEMS} tone="cool" />
+        <FAQ heading="Preguntas frecuentes." items={faqItems} tone="cool" />
 
         <ClosingCTA
           title={`Agenda tu sesión de ${exp.name}.`}

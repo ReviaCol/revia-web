@@ -4,7 +4,9 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
-import { CONTACT } from "@/lib/contact";
+import { getSiteContact } from "@/lib/site-content";
+import { getHomeContent } from "@/lib/home-content";
+import { renderEmphasis } from "@/lib/rich-text";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -15,7 +17,9 @@ export const metadata: Metadata = {
  * Hero cinematográfico full-bleed + Manifiesto + Filosofía split +
  * Tratamientos grid asimétrico + Longevidad turquesa profunda + Contacto.
  */
-export default function HomePage() {
+export default async function HomePage() {
+  const contact = await getSiteContact();
+  const home = await getHomeContent();
   return (
     <>
       <SiteNav variant="home" />
@@ -34,13 +38,12 @@ export default function HomePage() {
           <div className="scrim-side" />
           <div className="hero-inner">
             <h1 data-rev="up">
-              Tu belleza ya existe.
+              {home.heroLine1}
               <br />
-              Espera ser <em>revelada</em>.
+              {renderEmphasis(home.heroLine2)}
             </h1>
             <p className="sub" data-rev="up" data-delay="180">
-              Medicina estética y regenerativa no invasiva. Activamos lo que tu
-              biología ya conoce.
+              {home.heroSubtitle}
             </p>
           </div>
           <div className="scroll-cue">
@@ -57,7 +60,7 @@ export default function HomePage() {
         <section className="sec manifesto" aria-label="Manifiesto">
           <div className="wrap">
             <p className="eyebrow" data-rev="up">
-              Manifiesto
+              {home.manifestoEyebrow}
             </p>
             <p
               className="big"
@@ -65,9 +68,9 @@ export default function HomePage() {
               data-delay="120"
               style={{ marginTop: "36px" }}
             >
-              Buscamos tu verdadera esencia{" "}
+              {home.manifestoLine1}{" "}
               <span className="l2">
-                para revelarla en tu <em>mejor expresión</em>.
+                {renderEmphasis(home.manifestoLine2)}
               </span>
             </p>
           </div>
@@ -343,20 +346,20 @@ export default function HomePage() {
                 </Link>
                 <a
                   className="copt"
-                  href={CONTACT.whatsappUrl}
+                  href={contact.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <span>
                     <span className="t">WhatsApp</span>
-                    <span className="s">{CONTACT.whatsappDisplay}</span>
+                    <span className="s">{contact.whatsappDisplay}</span>
                   </span>
                   <span className="arw">→</span>
                 </a>
-                <a className="copt" href={CONTACT.telHref}>
+                <a className="copt" href={contact.telHref}>
                   <span>
                     <span className="t">Llamar</span>
-                    <span className="s">{CONTACT.telDisplay}</span>
+                    <span className="s">{contact.telDisplay}</span>
                   </span>
                   <span className="arw">→</span>
                 </a>
