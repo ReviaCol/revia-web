@@ -4,6 +4,8 @@ import fallbackData from "@/data/treatments.json";
 import {
   type Category,
   type Treatment,
+  type ProtocolStep,
+  type Technology,
   CATEGORY_SLUG_TO_ID,
   CATEGORY_ID_TO_SLUG,
 } from "@/lib/treatments";
@@ -26,7 +28,7 @@ import {
  * fallback y para consumidores que no pueden ser async (leads.ts, seo.ts, sitemap).
  */
 
-export type { Category, Treatment };
+export type { Category, Treatment, ProtocolStep, Technology };
 export { CATEGORY_SLUG_TO_ID, CATEGORY_ID_TO_SLUG };
 
 const FALLBACK_CATEGORIES = fallbackData.categories as unknown as Category[];
@@ -49,6 +51,10 @@ type TreatmentRow = {
   body_zones: string[] | null;
   visible: boolean;
   sort_order: number;
+  // Fase 4 (ADR 0018): columnas jsonb con contenido rico. null → template.
+  protocol: ProtocolStep[] | null;
+  candidate: string[] | null;
+  technology: Technology | null;
 };
 
 /**
@@ -84,7 +90,7 @@ async function fetchCatalogFromDb(): Promise<Category[] | null> {
         .order("sort_order", { ascending: true }),
       supabase
         .from("treatments")
-        .select("id,category_id,name,summary,outcome,body_zones,visible,sort_order")
+        .select("id,category_id,name,summary,outcome,body_zones,visible,sort_order,protocol,candidate,technology")
         .order("sort_order", { ascending: true }),
     ]);
 
@@ -103,6 +109,13 @@ async function fetchCatalogFromDb(): Promise<Category[] | null> {
       summary: t.summary,
       outcome: t.outcome ?? undefined,
       bodyZones: t.body_zones ?? [],
+      // Normalizamos vacíos a undefined para que la ficha caiga al template.
+      protocol: Array.isArray(t.protocol) && t.protocol.length ? t.protocol : undefined,
+      candidate: Array.isArray(t.candidate) && t.candidate.length ? t.candidate : undefined,
+      technology:
+        t.technology && (t.technology.lead || (t.technology.items?.length ?? 0) > 0)
+          ? t.technology
+          : undefined,
     });
     byCat.set(t.category_id, list);
   }

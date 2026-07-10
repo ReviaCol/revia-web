@@ -93,6 +93,23 @@ export function medicalProcedureJsonLd(
   return json;
 }
 
+/**
+ * FAQPage JSON-LD (Fase 4, ADR 0018). Se emite en una ficha SOLO cuando hay FAQ
+ * real por tratamiento — nunca sobre el template genérico duplicado, para no
+ * marcar como FAQPage contenido repetido entre URLs.
+ */
+export function faqPageJsonLd(items: { q: string; a: string }[]): Json {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    })),
+  };
+}
+
 /** BreadcrumbList JSON-LD. `path` relativo (se prefija con SITE_URL). */
 export function breadcrumbJsonLd(items: { name: string; path: string }[]): Json {
   return {

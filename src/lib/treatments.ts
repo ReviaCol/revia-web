@@ -12,12 +12,22 @@ import data from "@/data/treatments.json";
  * src/data/treatments.json es el respaldo; mantenerlo en sync con el seed 0005.
  */
 
+/** Paso del protocolo (Fase 4, ADR 0018) → PillarGrid. */
+export type ProtocolStep = { title: string; body: string };
+
+/** Bloque de tecnología (Fase 4, ADR 0018) → ProseSection + chips. */
+export type Technology = { lead: string; items: string[] };
+
 export type Treatment = {
   id: string;
   name: string;
   summary: string;
   outcome?: string;
   bodyZones?: string[];
+  /** Contenido rico editable (Fase 4). Ausente → la ficha usa el template genérico. */
+  protocol?: ProtocolStep[];
+  candidate?: string[];
+  technology?: Technology;
 };
 
 export type Category = {

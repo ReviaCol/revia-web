@@ -10,6 +10,10 @@ import {
   type TreatmentRow,
   type Palette,
   type ActionResult,
+  type ProtocolStep,
+  type Technology,
+  type FaqRow,
+  type QAInput,
 } from "../types";
 import {
   createCategory,
@@ -21,13 +25,15 @@ import {
   deleteTreatment,
   setTreatmentVisible,
   setTreatmentOrder,
+  saveTreatmentFaqs,
 } from "../actions";
 
 /**
- * CatalogBoard — CRUD del catálogo de tratamientos y categorías (CMS Fase 1).
- * Usa AdminShell (chrome + estilos compartidos). Acciones de "crear" como
- * botones evidentes. Workflow: edit-is-live + toggle `visible`. Cada guardado
- * dispara updateTag("catalog") en la server action → el sitio se refresca solo.
+ * CatalogBoard — CRUD del catálogo de tratamientos y categorías.
+ * Fase 1 (ADR 0014): categorías + tratamientos. Fase 4 (ADR 0018): contenido
+ * rico por tratamiento (protocolo, para quién, tecnología) + FAQ por tratamiento
+ * (tabla faqs, scope = treatment id). Workflow: edit-is-live + toggle `visible`.
+ * Guardar dispara updateTag("catalog") y, para la FAQ, updateTag("site-content").
  */
 
 type TreatmentInput = {
@@ -37,6 +43,9 @@ type TreatmentInput = {
   outcome?: string;
   bodyZones: string[];
   visible: boolean;
+  protocol?: ProtocolStep[] | null;
+  candidate?: string[] | null;
+  technology?: Technology | null;
 };
 
 function move<T>(arr: T[], from: number, to: number): T[] {
@@ -50,17 +59,20 @@ function move<T>(arr: T[], from: number, to: number): T[] {
 export function CatalogBoard({
   initialCategories,
   initialTreatments,
+  initialFaqs,
   userEmail,
   loadError,
 }: {
   initialCategories: CategoryRow[];
   initialTreatments: TreatmentRow[];
+  initialFaqs: FaqRow[];
   userEmail: string;
   loadError?: boolean;
 }) {
   const router = useRouter();
   const [cats, setCats] = useState<CategoryRow[]>(initialCategories);
   const [treatments, setTreatments] = useState<TreatmentRow[]>(initialTreatments);
+  const [faqs, setFaqs] = useState<FaqRow[]>(initialFaqs);
   const [errorMsg, setErrorMsg] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -69,6 +81,26 @@ export function CatalogBoard({
     () => [...cats].sort((a, b) => a.sort_order - b.sort_order),
     [cats],
   );
+
+  function faqsOf(scope: string): QAInput[] {
+    return faqs
+      .filter((f) => f.scope === scope)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((f) => ({ question: f.question, answer: f.answer }));
+  }
+  function setScopeFaqs(scope: string, items: QAInput[]) {
+    setFaqs((prev) => [
+      ...prev.filter((f) => f.scope !== scope),
+      ...items.map((it, i) => ({
+        id: `local-${scope}-${i}`,
+        scope,
+        question: it.question,
+        answer: it.answer,
+        sort_order: i,
+        visible: true,
+      })),
+    ]);
+  }
 
   function run(action: () => Promise<ActionResult>, onOk?: () => void) {
     setErrorMsg("");
@@ -113,16 +145,24 @@ export function CatalogBoard({
   function treatmentsOf(catId: string) {
     return treatments.filter((t) => t.category_id === catId).sort((a, b) => a.sort_order - b.sort_order);
   }
-  function handleCreateTreatment(input: TreatmentInput, done: () => void) {
+  function handleCreateTreatment(input: TreatmentInput, faqItems: QAInput[], done: () => void) {
     run(
-      () => createTreatment(input),
+      async () => {
+        const res = await createTreatment(input);
+        if (!res.ok) return res;
+        if (res.id && faqItems.length) {
+          const f = await saveTreatmentFaqs(res.id, faqItems);
+          if (!f.ok) return f;
+        }
+        return res;
+      },
       () => {
         done();
         router.refresh();
       },
     );
   }
-  function handleUpdateTreatment(id: string, patch: TreatmentInput, done: () => void) {
+  function handleUpdateTreatment(id: string, patch: TreatmentInput, faqItems: QAInput[], done: () => void) {
     setTreatments((ts) =>
       ts.map((t) =>
         t.id === id
@@ -134,11 +174,19 @@ export function CatalogBoard({
               outcome: patch.outcome || null,
               body_zones: patch.bodyZones,
               visible: patch.visible,
+              protocol: patch.protocol ?? null,
+              candidate: patch.candidate ?? null,
+              technology: patch.technology ?? null,
             }
           : t,
       ),
     );
-    run(() => updateTreatment(id, patch), done);
+    setScopeFaqs(id, faqItems);
+    run(async () => {
+      const res = await updateTreatment(id, patch);
+      if (!res.ok) return res;
+      return saveTreatmentFaqs(id, faqItems);
+    }, done);
   }
   function handleToggleVisible(id: string, visible: boolean) {
     setTreatments((ts) => ts.map((t) => (t.id === id ? { ...t, visible } : t)));
@@ -211,6 +259,7 @@ export function CatalogBoard({
           index={i}
           total={sortedCats.length}
           cats={sortedCats}
+          faqsOf={faqsOf}
           treatments={treatmentsOf(cat.id)}
           disabled={pending}
           onUpdateCategory={handleUpdateCategory}
@@ -240,6 +289,7 @@ function CategorySection({
   total,
   cats,
   treatments,
+  faqsOf,
   disabled,
   onUpdateCategory,
   onDeleteCategory,
@@ -255,12 +305,13 @@ function CategorySection({
   total: number;
   cats: CategoryRow[];
   treatments: TreatmentRow[];
+  faqsOf: (scope: string) => QAInput[];
   disabled: boolean;
   onUpdateCategory: (id: string, patch: { name: string; palette: Palette; headline?: string }) => void;
   onDeleteCategory: (id: string) => void;
   onMoveCategory: (index: number, dir: -1 | 1) => void;
-  onCreateTreatment: (input: TreatmentInput, done: () => void) => void;
-  onUpdateTreatment: (id: string, patch: TreatmentInput, done: () => void) => void;
+  onCreateTreatment: (input: TreatmentInput, faqs: QAInput[], done: () => void) => void;
+  onUpdateTreatment: (id: string, patch: TreatmentInput, faqs: QAInput[], done: () => void) => void;
   onToggleVisible: (id: string, visible: boolean) => void;
   onDeleteTreatment: (id: string) => void;
   onMoveTreatment: (catId: string, index: number, dir: -1 | 1) => void;
@@ -320,8 +371,9 @@ function CategorySection({
               <TreatmentFields
                 cats={cats}
                 defaultCategoryId={cat.id}
+                initialFaqs={[]}
                 disabled={disabled}
-                onSubmit={(input, done) => onCreateTreatment(input, () => { done(); setCreating(false); })}
+                onSubmit={(input, faqs, done) => onCreateTreatment(input, faqs, () => { done(); setCreating(false); })}
                 onCancel={() => setCreating(false)}
                 submitLabel="Crear tratamiento"
               />
@@ -337,6 +389,7 @@ function CategorySection({
                   index={i}
                   total={treatments.length}
                   cats={cats}
+                  initialFaqs={faqsOf(t.id)}
                   disabled={disabled}
                   onUpdate={onUpdateTreatment}
                   onToggleVisible={onToggleVisible}
@@ -364,6 +417,7 @@ function TreatmentItem({
   index,
   total,
   cats,
+  initialFaqs,
   disabled,
   onUpdate,
   onToggleVisible,
@@ -374,14 +428,21 @@ function TreatmentItem({
   index: number;
   total: number;
   cats: CategoryRow[];
+  initialFaqs: QAInput[];
   disabled: boolean;
-  onUpdate: (id: string, patch: TreatmentInput, done: () => void) => void;
+  onUpdate: (id: string, patch: TreatmentInput, faqs: QAInput[], done: () => void) => void;
   onToggleVisible: (id: string, visible: boolean) => void;
   onDelete: (id: string) => void;
   onMove: (dir: -1 | 1) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const t = treatment;
+
+  const richCount =
+    (t.protocol?.length ? 1 : 0) +
+    (t.candidate?.length ? 1 : 0) +
+    (t.technology ? 1 : 0) +
+    (initialFaqs.length ? 1 : 0);
 
   if (editing) {
     return (
@@ -391,8 +452,9 @@ function TreatmentItem({
           <TreatmentFields
             cats={cats}
             initial={t}
+            initialFaqs={initialFaqs}
             disabled={disabled}
-            onSubmit={(patch, done) => onUpdate(t.id, patch, () => { done(); setEditing(false); })}
+            onSubmit={(patch, faqs, done) => onUpdate(t.id, patch, faqs, () => { done(); setEditing(false); })}
             onCancel={() => setEditing(false)}
             submitLabel="Guardar cambios"
           />
@@ -407,6 +469,11 @@ function TreatmentItem({
         <p className="adm-tr-name">
           {t.name}
           {!t.visible && <span className="adm-tag">Oculto</span>}
+          {richCount > 0 && (
+            <span className="adm-tag" style={{ background: "var(--revia-sky-500)", color: "#fff" }}>
+              Ficha {richCount}/4
+            </span>
+          )}
         </p>
         {t.summary && <p className="adm-tr-sum">{t.summary}</p>}
         {t.body_zones.length > 0 && <p className="adm-tr-zones">{t.body_zones.join(" · ")}</p>}
@@ -487,6 +554,7 @@ function CategoryForm({
 function TreatmentFields({
   cats,
   initial,
+  initialFaqs,
   defaultCategoryId,
   disabled,
   onSubmit,
@@ -495,9 +563,10 @@ function TreatmentFields({
 }: {
   cats: CategoryRow[];
   initial?: TreatmentRow;
+  initialFaqs: QAInput[];
   defaultCategoryId?: string;
   disabled: boolean;
-  onSubmit: (input: TreatmentInput, done: () => void) => void;
+  onSubmit: (input: TreatmentInput, faqs: QAInput[], done: () => void) => void;
   onCancel: () => void;
   submitLabel: string;
 }) {
@@ -508,14 +577,45 @@ function TreatmentFields({
   const [zones, setZones] = useState((initial?.body_zones ?? []).join(", "));
   const [visible, setVisible] = useState(initial?.visible ?? true);
 
+  // Contenido rico (Fase 4).
+  const [protocol, setProtocol] = useState<ProtocolStep[]>(initial?.protocol ?? []);
+  const [candidateText, setCandidateText] = useState((initial?.candidate ?? []).join("\n\n"));
+  const [techLead, setTechLead] = useState(initial?.technology?.lead ?? "");
+  const [techItems, setTechItems] = useState((initial?.technology?.items ?? []).join(", "));
+  const [faqs, setFaqs] = useState<QAInput[]>(initialFaqs);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
+
+    const candidate = candidateText.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+    const techItemsArr = techItems.split(",").map((s) => s.trim()).filter(Boolean);
+    const technology: Technology | null =
+      techLead.trim() || techItemsArr.length ? { lead: techLead.trim(), items: techItemsArr } : null;
+    const protocolClean = protocol
+      .map((s) => ({ title: s.title.trim(), body: s.body.trim() }))
+      .filter((s) => s.title || s.body);
+    const faqClean = faqs
+      .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+      .filter((f) => f.question && f.answer);
+
     onSubmit(
-      { categoryId, name, summary, outcome, bodyZones: parseBodyZones(zones), visible },
+      {
+        categoryId,
+        name,
+        summary,
+        outcome,
+        bodyZones: parseBodyZones(zones),
+        visible,
+        protocol: protocolClean.length ? protocolClean : null,
+        candidate: candidate.length ? candidate : null,
+        technology,
+      },
+      faqClean,
       () => {
         if (!initial) {
           setName(""); setSummary(""); setOutcome(""); setZones(""); setVisible(true);
+          setProtocol([]); setCandidateText(""); setTechLead(""); setTechItems(""); setFaqs([]);
         }
       },
     );
@@ -550,6 +650,51 @@ function TreatmentFields({
         <input className="adm-input" value={zones} onChange={(e) => setZones(e.target.value)} placeholder="rostro-completo, cuello" />
         <p className="adm-hint">Sepáralas con comas. Se guardan en minúsculas y con guiones.</p>
       </div>
+
+      {/* Contenido de la ficha (Fase 4) — colapsable para no saturar el form base. */}
+      <details className="adm-field" style={{ border: "1px solid var(--revia-sky-200)", borderRadius: "10px", padding: "14px 16px" }}>
+        <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+          Contenido de la ficha — protocolo, para quién, tecnología y FAQ
+        </summary>
+        <p className="adm-hint" style={{ marginTop: "10px" }}>
+          Si dejas una sección vacía, la ficha usa el texto genérico del sitio.
+          Contenido clínico a validar con el equipo médico. No invasivo, sin inventar cifras.
+        </p>
+
+        <div className="adm-field" style={{ marginTop: "16px" }}>
+          <label>Para quién (candidato ideal)</label>
+          <textarea
+            className="adm-input"
+            rows={4}
+            value={candidateText}
+            onChange={(e) => setCandidateText(e.target.value)}
+            placeholder={"Un párrafo por bloque, separados por una línea en blanco."}
+          />
+          <p className="adm-hint">Separa los párrafos con una línea en blanco.</p>
+        </div>
+
+        <div className="adm-field">
+          <label>Tecnología usada</label>
+          <textarea
+            className="adm-input"
+            rows={2}
+            value={techLead}
+            onChange={(e) => setTechLead(e.target.value)}
+            placeholder="Frase introductoria sobre la tecnología no invasiva del tratamiento."
+          />
+          <input
+            className="adm-input"
+            style={{ marginTop: "8px" }}
+            value={techItems}
+            onChange={(e) => setTechItems(e.target.value)}
+            placeholder="Equipos/técnicas separadas por comas (opcional)"
+          />
+        </div>
+
+        <StepListEditor steps={protocol} onChange={setProtocol} disabled={disabled} />
+        <FaqListEditor faqs={faqs} onChange={setFaqs} disabled={disabled} />
+      </details>
+
       <label className="adm-check">
         <input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
         Visible en el sitio
@@ -559,6 +704,92 @@ function TreatmentFields({
         <button type="button" className="adm-btn adm-btn-ghost" disabled={disabled} onClick={onCancel}>Cancelar</button>
       </div>
     </form>
+  );
+}
+
+/* ── editor de pasos del protocolo ────────────────────────────────────── */
+function StepListEditor({
+  steps,
+  onChange,
+  disabled,
+}: {
+  steps: ProtocolStep[];
+  onChange: (next: ProtocolStep[]) => void;
+  disabled: boolean;
+}) {
+  function update(i: number, patch: Partial<ProtocolStep>) {
+    onChange(steps.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  }
+  return (
+    <div className="adm-field">
+      <label>Protocolo (pasos)</label>
+      {steps.map((s, i) => (
+        <div key={i} style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px", paddingLeft: "10px", borderLeft: "2px solid var(--revia-sky-200)" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              className="adm-input"
+              value={s.title}
+              onChange={(e) => update(i, { title: e.target.value })}
+              placeholder={`Título del paso ${i + 1}`}
+            />
+            <button type="button" className="adm-btn adm-btn-outline adm-ico" disabled={disabled} onClick={() => onChange(steps.filter((_, idx) => idx !== i))} aria-label="Quitar paso" title="Quitar">✕</button>
+          </div>
+          <textarea
+            className="adm-input"
+            rows={2}
+            value={s.body}
+            onChange={(e) => update(i, { body: e.target.value })}
+            placeholder="Descripción del paso"
+          />
+        </div>
+      ))}
+      <button type="button" className="adm-btn adm-btn-outline" disabled={disabled} onClick={() => onChange([...steps, { title: "", body: "" }])}>
+        ＋ Añadir paso
+      </button>
+    </div>
+  );
+}
+
+/* ── editor de FAQ por tratamiento ────────────────────────────────────── */
+function FaqListEditor({
+  faqs,
+  onChange,
+  disabled,
+}: {
+  faqs: QAInput[];
+  onChange: (next: QAInput[]) => void;
+  disabled: boolean;
+}) {
+  function update(i: number, patch: Partial<QAInput>) {
+    onChange(faqs.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
+  }
+  return (
+    <div className="adm-field">
+      <label>Preguntas frecuentes (por tratamiento)</label>
+      {faqs.map((f, i) => (
+        <div key={i} style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "10px", paddingLeft: "10px", borderLeft: "2px solid var(--revia-sky-200)" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              className="adm-input"
+              value={f.question}
+              onChange={(e) => update(i, { question: e.target.value })}
+              placeholder={`Pregunta ${i + 1}`}
+            />
+            <button type="button" className="adm-btn adm-btn-outline adm-ico" disabled={disabled} onClick={() => onChange(faqs.filter((_, idx) => idx !== i))} aria-label="Quitar pregunta" title="Quitar">✕</button>
+          </div>
+          <textarea
+            className="adm-input"
+            rows={2}
+            value={f.answer}
+            onChange={(e) => update(i, { answer: e.target.value })}
+            placeholder="Respuesta honesta, sin inventar cifras clínicas."
+          />
+        </div>
+      ))}
+      <button type="button" className="adm-btn adm-btn-outline" disabled={disabled} onClick={() => onChange([...faqs, { question: "", answer: "" }])}>
+        ＋ Añadir pregunta
+      </button>
+    </div>
   );
 }
 

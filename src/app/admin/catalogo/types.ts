@@ -14,6 +14,9 @@ export type CategoryRow = {
   sort_order: number;
 };
 
+export type ProtocolStep = { title: string; body: string };
+export type Technology = { lead: string; items: string[] };
+
 export type TreatmentRow = {
   id: string;
   category_id: string;
@@ -23,7 +26,24 @@ export type TreatmentRow = {
   body_zones: string[];
   visible: boolean;
   sort_order: number;
+  // Fase 4 (ADR 0018): contenido rico. null = ficha usa el template genérico.
+  protocol: ProtocolStep[] | null;
+  candidate: string[] | null;
+  technology: Technology | null;
 };
+
+/** Fila de la tabla faqs (Fase 2). En Fase 4, scope = <treatment id>. */
+export type FaqRow = {
+  id: string;
+  scope: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+  visible: boolean;
+};
+
+/** Q/A tal como la edita el panel (sin id de fila). */
+export type QAInput = { question: string; answer: string };
 
 export type ActionResult = { ok: boolean; error?: string; id?: string };
 

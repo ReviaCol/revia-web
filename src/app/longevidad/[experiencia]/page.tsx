@@ -8,20 +8,23 @@ import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
 import { getFaqs } from "@/lib/faqs";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
-import { getCategoryById } from "@/lib/treatments";
+import { getCategoryById } from "@/lib/catalog";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { breadcrumbJsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, faqPageJsonLd } from "@/lib/seo";
 
 const LONGEVIDAD_ID = "longevidad-bienestar";
 
-function getExperience(id: string) {
-  return getCategoryById(LONGEVIDAD_ID)?.treatments.find((t) => t.id === id);
+async function getExperience(id: string) {
+  const cat = await getCategoryById(LONGEVIDAD_ID);
+  return cat?.treatments.find((t) => t.id === id);
 }
 
-export function generateStaticParams() {
-  return (getCategoryById(LONGEVIDAD_ID)?.treatments ?? []).map((t) => ({
-    experiencia: t.id,
-  }));
+// dynamicParams=true: experiencias nuevas creadas en /admin renderizan on-demand.
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const cat = await getCategoryById(LONGEVIDAD_ID);
+  return (cat?.treatments ?? []).map((t) => ({ experiencia: t.id }));
 }
 
 export async function generateMetadata({
@@ -30,7 +33,7 @@ export async function generateMetadata({
   params: Promise<{ experiencia: string }>;
 }): Promise<Metadata> {
   const { experiencia } = await params;
-  const exp = getExperience(experiencia);
+  const exp = await getExperience(experiencia);
   if (!exp) return { title: "Longevidad — Reviá" };
   return {
     title: `${exp.name} — Reviá`,
@@ -51,9 +54,24 @@ export default async function ExperienciaPage({
   params: Promise<{ experiencia: string }>;
 }) {
   const { experiencia } = await params;
-  const exp = getExperience(experiencia);
+  const exp = await getExperience(experiencia);
   if (!exp) notFound();
-  const faqItems = await getFaqs("longevidad");
+
+  // Fase 4 (ADR 0018): contenido rico editable con fallback al template.
+  const candidateParas = exp.candidate ?? [
+    `${exp.name} es para quien quiere recuperar energía, claridad y equilibrio sin procedimientos invasivos.`,
+    "En tu evaluación de longevidad definimos si es la experiencia indicada para ti o si otra se ajusta mejor a tu momento. Con honestidad, siempre.",
+  ];
+  const sessionSteps = exp.protocol ?? SESSION_STEPS;
+  const technology = exp.technology;
+  const techParagraphs = technology
+    ? [technology.lead, ...(technology.items.length > 0 ? [technology.items.join("  ·  ")] : [])]
+    : [];
+
+  // FAQ por experiencia (scope = experiencia); fallback a la FAQ de scope longevidad.
+  const perExpFaq = await getFaqs(experiencia);
+  const hasRealFaq = perExpFaq.length > 0;
+  const faqItems = hasRealFaq ? perExpFaq : await getFaqs("longevidad");
 
   return (
     <>
@@ -64,6 +82,7 @@ export default async function ExperienciaPage({
           { name: exp.name, path: `/longevidad/${experiencia}` },
         ])}
       />
+      {hasRealFaq && <JsonLd data={faqPageJsonLd(faqItems)} />}
       <SiteNav current="/longevidad" />
       <main id="contenido" style={{ background: "var(--revia-sky-50)" }}>
         <PageHero
@@ -83,10 +102,26 @@ export default async function ExperienciaPage({
           tone="cool"
         />
 
+        <ProseSection
+          eyebrow="Para quién"
+          heading="¿Es para ti?"
+          paragraphs={candidateParas}
+          tone="cool"
+        />
+
+        {technology && (
+          <ProseSection
+            eyebrow="La tecnología"
+            heading="Con qué la vivimos."
+            paragraphs={techParagraphs}
+            tone="cool"
+          />
+        )}
+
         <PillarGrid
           eyebrow="Cómo es la sesión"
           heading="Paso a paso, sin prisa."
-          pillars={SESSION_STEPS}
+          pillars={sessionSteps}
           tone="cool"
         />
 

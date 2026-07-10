@@ -8,7 +8,8 @@ import { PillarGrid } from "@/components/page/PillarGrid";
 import { FAQ } from "@/components/page/FAQ";
 import { ClosingCTA } from "@/components/page/ClosingCTA";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { SITE_URL, medicalProcedureJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { getFaqs } from "@/lib/faqs";
+import { SITE_URL, medicalProcedureJsonLd, breadcrumbJsonLd, faqPageJsonLd } from "@/lib/seo";
 import { getTreatmentBySlug, getTreatmentParams } from "@/lib/catalog";
 
 function humanizeZone(zone: string): string {
@@ -74,6 +75,23 @@ export default async function TratamientoDetallePage({
 
   const procedureUrl = `${SITE_URL}/tratamientos/${categoria}/${slug}`;
 
+  // Fase 4 (ADR 0018): contenido rico editable con fallback al template genérico.
+  const candidateParas = treatment.candidate ?? [
+    "Este tratamiento es ideal para quienes buscan un resultado natural y sostenido, sin procedimientos invasivos.",
+    "En tu valoración te diremos con honestidad si es el camino indicado para ti o si otro protocolo se ajusta mejor a tu objetivo. La transparencia es parte del cuidado.",
+  ];
+  const protocolPillars = treatment.protocol ?? PROTOCOL;
+  const technology = treatment.technology;
+  const techParagraphs = technology
+    ? [technology.lead, ...(technology.items.length > 0 ? [technology.items.join("  ·  ")] : [])]
+    : [];
+
+  // FAQ por tratamiento (faqs scope = slug). Sin filas propias → FAQ genérica.
+  // El FAQPage JSON-LD solo se emite con FAQ real (no sobre el template duplicado).
+  const faqFromDb = await getFaqs(slug);
+  const hasRealFaq = faqFromDb.length > 0;
+  const faqItems = hasRealFaq ? faqFromDb : FAQ_ITEMS;
+
   return (
     <>
       <JsonLd data={medicalProcedureJsonLd(treatment, category, procedureUrl)} />
@@ -85,6 +103,7 @@ export default async function TratamientoDetallePage({
           { name: treatment.name, path: `/tratamientos/${categoria}/${slug}` },
         ])}
       />
+      {hasRealFaq && <JsonLd data={faqPageJsonLd(faqItems)} />}
       <SiteNav current="/tratamientos" />
       <main id="contenido">
         <PageHero
@@ -104,21 +123,27 @@ export default async function TratamientoDetallePage({
         <ProseSection
           eyebrow="Para quién"
           heading="¿Es para ti?"
-          paragraphs={[
-            "Este tratamiento es ideal para quienes buscan un resultado natural y sostenido, sin procedimientos invasivos.",
-            "En tu valoración te diremos con honestidad si es el camino indicado para ti o si otro protocolo se ajusta mejor a tu objetivo. La transparencia es parte del cuidado.",
-          ]}
+          paragraphs={candidateParas}
           tone="warm"
           background="var(--revia-cream-100)"
         />
 
+        {technology && (
+          <ProseSection
+            eyebrow="La tecnología"
+            heading="Con qué lo hacemos."
+            paragraphs={techParagraphs}
+            tone="warm"
+          />
+        )}
+
         <PillarGrid
           eyebrow="El protocolo"
           heading="Cómo lo acompañamos."
-          pillars={PROTOCOL}
+          pillars={protocolPillars}
         />
 
-        <FAQ heading="Preguntas frecuentes." items={FAQ_ITEMS} />
+        <FAQ heading="Preguntas frecuentes." items={faqItems} />
 
         <ClosingCTA
           title={`Inicia tu consulta para ${treatment.name}.`}

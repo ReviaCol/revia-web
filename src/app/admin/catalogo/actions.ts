@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { ActionResult, Palette } from "./types";
+import type { ActionResult, Palette, ProtocolStep, Technology, QAInput } from "./types";
 
 /**
  * Server actions del catálogo (CMS Fase 1, ADR 0014).
@@ -36,6 +36,67 @@ function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
+}
+
+/* ── Normalizadores de contenido rico (Fase 4, ADR 0018) ─────────────────── */
+
+function cleanProtocol(p?: ProtocolStep[] | null): ProtocolStep[] | null {
+  const r = (p ?? [])
+    .map((s) => ({ title: (s.title ?? "").trim(), body: (s.body ?? "").trim() }))
+    .filter((s) => s.title || s.body);
+  return r.length ? r : null;
+}
+
+function cleanCandidate(c?: string[] | null): string[] | null {
+  const r = (c ?? []).map((s) => (s ?? "").trim()).filter(Boolean);
+  return r.length ? r : null;
+}
+
+function cleanTechnology(t?: Technology | null): Technology | null {
+  if (!t) return null;
+  const lead = (t.lead ?? "").trim();
+  const items = (t.items ?? []).map((s) => (s ?? "").trim()).filter(Boolean);
+  return lead || items.length ? { lead, items } : null;
+}
+
+/**
+ * Reemplaza TODAS las FAQ del scope (delete + insert) con la lista dada. La FAQ
+ * por tratamiento vive en public.faqs con scope = <treatment id> (reuso Fase 2).
+ * Deduplica por pregunta (unique(scope,question)). Revalida "site-content".
+ */
+export async function saveTreatmentFaqs(
+  scope: string,
+  items: QAInput[],
+): Promise<ActionResult> {
+  const supabase = await authed();
+  if (!supabase) return { ok: false, error: "Sesión expirada. Vuelve a entrar." };
+  if (!scope) return { ok: false, error: "Falta el tratamiento." };
+
+  const { error: delErr } = await supabase.from("faqs").delete().eq("scope", scope);
+  if (delErr) return { ok: false, error: delErr.message };
+
+  const seen = new Set<string>();
+  const rows = items
+    .map((i, idx) => ({
+      scope,
+      question: (i.question ?? "").trim(),
+      answer: (i.answer ?? "").trim(),
+      sort_order: idx,
+      visible: true,
+    }))
+    .filter((r) => {
+      if (!r.question || !r.answer || seen.has(r.question)) return false;
+      seen.add(r.question);
+      return true;
+    })
+    .map((r, idx) => ({ ...r, sort_order: idx }));
+
+  if (rows.length) {
+    const { error } = await supabase.from("faqs").insert(rows);
+    if (error) return { ok: false, error: error.message };
+  }
+  updateTag("site-content");
+  return { ok: true };
 }
 
 /** Encuentra un id libre a partir de una base (base, base-2, base-3, …). */
@@ -141,6 +202,9 @@ export async function createTreatment(input: {
   outcome?: string;
   bodyZones: string[];
   visible: boolean;
+  protocol?: ProtocolStep[] | null;
+  candidate?: string[] | null;
+  technology?: Technology | null;
 }): Promise<ActionResult> {
   const supabase = await authed();
   if (!supabase) return { ok: false, error: "Sesión expirada. Vuelve a entrar." };
@@ -159,6 +223,9 @@ export async function createTreatment(input: {
     body_zones: input.bodyZones,
     visible: input.visible,
     sort_order,
+    protocol: cleanProtocol(input.protocol),
+    candidate: cleanCandidate(input.candidate),
+    technology: cleanTechnology(input.technology),
   });
   if (error) return { ok: false, error: error.message };
   updateTag("catalog");
@@ -174,6 +241,9 @@ export async function updateTreatment(
     outcome?: string;
     bodyZones: string[];
     visible: boolean;
+    protocol?: ProtocolStep[] | null;
+    candidate?: string[] | null;
+    technology?: Technology | null;
   },
 ): Promise<ActionResult> {
   const supabase = await authed();
@@ -190,6 +260,9 @@ export async function updateTreatment(
       outcome: patch.outcome?.trim() || null,
       body_zones: patch.bodyZones,
       visible: patch.visible,
+      protocol: cleanProtocol(patch.protocol),
+      candidate: cleanCandidate(patch.candidate),
+      technology: cleanTechnology(patch.technology),
     })
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
