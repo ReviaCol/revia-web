@@ -31,6 +31,8 @@ export type UxTreatment = {
   cat: CategoryId;
   id: string;
   name: string;
+  summary?: string;
+  outcome?: string;
 };
 
 const CATEGORIES: { id: CategoryId | "todos"; label: string }[] = [
@@ -99,6 +101,8 @@ function TreatmentCard({ t }: { t: UxTreatment }) {
     >
       <span className="tx-chip">No invasivo</span>
       <h3>{t.name}</h3>
+      {t.summary ? <p className="tx-sum">{t.summary}</p> : null}
+      {t.outcome ? <p className="tx-outcome">{t.outcome}</p> : null}
       <span style={cueStyle}>
         {dest.cue}
         <span aria-hidden="true">→</span>

@@ -741,7 +741,13 @@ image-slot::part(ring){border-color:rgba(89,65,60,.28);}
 }
 .tx-card .tx-sum{
   font-size:14px; line-height:1.55; color:var(--ink-700);
-  margin:0 0 18px; flex:1;
+  margin:0 0 14px;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+.tx-card .tx-outcome{
+  margin:0 0 4px;
+  font-family:var(--font-display); font-weight:400; font-style:italic;
+  font-size:14px; line-height:1.4; color:var(--turq-deep);
 }
 .tx-card .tx-meta{
   display:flex; flex-wrap:wrap; gap:14px 22px;
@@ -761,7 +767,7 @@ image-slot::part(ring){border-color:rgba(89,65,60,.28);}
 }
 
 /* Grupo (categoría) header */
-.tx-group{margin-bottom:clamp(40px,5vw,72px);}
+.tx-group{margin-bottom:clamp(40px,5vw,72px); scroll-margin-top:calc(var(--nav-h) + 24px);}
 .tx-group:last-child{margin-bottom:0;}
 .tx-group .tx-group-head{
   display:flex; align-items:baseline; gap:18px; flex-wrap:wrap;
@@ -1078,6 +1084,5 @@ image-slot::part(ring){border-color:rgba(89,65,60,.28);}
 
 /* Tratamientos UX: cards sin meta (no hay duraciones/resultados validados) */
 .tx-card{min-height:120px;}
-.tx-card h3{margin-bottom:0;}
-.tx-card .tx-sum, .tx-card .tx-meta{display:none;}
+.tx-card .tx-meta{display:none;}
 

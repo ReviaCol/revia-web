@@ -50,7 +50,13 @@ export default async function TratamientosPage() {
   const uxTreatments: UxTreatment[] = catalog.flatMap((c) => {
     const cat = DB_TO_UX[c.id];
     if (!cat) return [];
-    return c.treatments.map((t) => ({ cat, id: t.id, name: t.name }));
+    return c.treatments.map((t) => ({
+      cat,
+      id: t.id,
+      name: t.name,
+      summary: t.summary,
+      outcome: t.outcome,
+    }));
   });
 
   return (
