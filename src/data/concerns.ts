@@ -31,7 +31,7 @@ export const CONCERNS: Concern[] = [
   {
     id: "firmeza",
     label: "Firmeza y flacidez",
-    blurb: "Reafirmar lo que la gravedad afloja.",
+    blurb: "Reactivar la firmeza que el tiempo adormece.",
     treatmentIds: [
       "radiofrecuencia-fraccionada",
       "bioestimuladores",

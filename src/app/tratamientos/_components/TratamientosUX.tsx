@@ -324,7 +324,8 @@ export function TratamientosExplorer({ treatments }: { treatments: UxTreatment[]
                 <button
                   key={c.id}
                   type="button"
-                  className={`tcard${sel.k === "cat" && sel.id === c.id ? " is-picked" : ""}`}
+                  className="tcard"
+                  data-picked={sel.k === "cat" && sel.id === c.id ? "true" : undefined}
                   style={{ background: c.bg }}
                   aria-label={`Ver tratamientos de ${c.label}`}
                   onClick={() => pickCategoryFromHero(c.id)}
