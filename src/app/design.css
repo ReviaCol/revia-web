@@ -671,11 +671,7 @@ image-slot::part(ring){border-color:rgba(89,65,60,.28);}
    (Reemplaza la lista plana .catlist por una vista mucho más navegable)
    ============================================================================= */
 .tx-tabs{
-  display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
-  margin:0 0 clamp(36px,4vw,60px);
-  padding:clamp(20px,2.4vw,32px) 0;
-  border-top:1px solid rgba(89,65,60,.12);
-  border-bottom:1px solid rgba(89,65,60,.12);
+  display:flex; flex-wrap:wrap; gap:8px;
 }
 .tx-tab{
   display:inline-flex; align-items:center; gap:8px;
@@ -1086,3 +1082,75 @@ image-slot::part(ring){border-color:rgba(89,65,60,.28);}
 .tx-card{min-height:120px;}
 .tx-card .tx-meta{display:none;}
 
+                                                                                                                                                                                        
+/* =============================================================================
+   Tratamientos — selector unificado (ADR 0019)
+   Hero cards como botón-filtro, doble eje (categoría + preocupación),
+   entrada guiada con empty-state, scroll con offset del nav.
+   ============================================================================= */
+
+/* Las hero cards de categoría ahora pueden ser <button>: reset a apariencia
+   de card sin estilo de botón nativo. */
+.cards6 button.tcard{
+  appearance:none; -webkit-appearance:none; border:0; margin:0; padding:0;
+  width:100%; font:inherit; color:inherit; text-align:left; cursor:pointer;
+}
+.tcard.is-picked{outline:2px solid var(--turq); outline-offset:-2px;}
+.tcard.is-picked .veil{opacity:.9;}
+
+/* Ancla del menú: al hacer scroll desde una hero card, deja aire bajo el nav. */
+.tx-menu{scroll-margin-top:calc(var(--nav-h) + 16px);}
+
+/* Barra de filtros: enmarca los dos ejes (antes el borde vivía en .tx-tabs). */
+.tx-filters{
+  margin:0 0 clamp(28px,3.2vw,44px);
+  padding:clamp(20px,2.4vw,30px) 0;
+  border-top:1px solid rgba(89,65,60,.12);
+  border-bottom:1px solid rgba(89,65,60,.12);
+  display:flex; flex-direction:column; gap:clamp(18px,2vw,26px);
+}
+.tx-axis{display:flex; flex-direction:column; gap:12px;}
+.tx-axis-label{
+  font-family:var(--font-body); font-weight:500; font-size:10px;
+  letter-spacing:.24em; text-transform:uppercase; color:var(--ink-500); opacity:.9;
+}
+
+/* Chips de preocupación — variante redondeada, acento turquesa. */
+.tx-chips{display:flex; flex-wrap:wrap; gap:8px;}
+.tx-concern{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:9px 18px; cursor:pointer; border-radius:999px;
+  font-family:var(--font-body); font-weight:500; font-size:12px;
+  letter-spacing:.1em; text-transform:none;
+  background:transparent; color:var(--ink-700);
+  border:1px solid rgba(53,132,140,.32);
+  transition:all .35s var(--ease);
+}
+.tx-concern:hover{color:var(--turq-deep); border-color:var(--turq-deep);}
+.tx-concern.is-active{background:var(--turq-deep); color:var(--cream-50); border-color:var(--turq-deep);}
+.tx-concern .tx-tab-count{
+  font-family:var(--font-display); font-weight:400; font-size:11px; opacity:.7; letter-spacing:0;
+}
+
+/* Nota poética junto al eyebrow del grupo (blurb de la preocupación). */
+.tx-group .tx-group-note{
+  font-family:var(--font-display); font-weight:300; font-style:italic;
+  font-size:clamp(15px,1.5vw,18px); color:var(--turq-deep); line-height:1.3;
+}
+
+/* Estado guiado: sin selección, invita a elegir. */
+.tx-results{min-height:220px;}
+.tx-empty{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; text-align:center; padding:clamp(40px,7vw,88px) 0;
+}
+.tx-empty-mark{
+  font-family:var(--font-body); font-size:22px; color:var(--turq-deep);
+  animation:txbob 2.4s var(--ease) infinite;
+}
+.tx-empty-line{
+  font-family:var(--font-display); font-weight:300;
+  font-size:clamp(18px,2vw,24px); line-height:1.5; color:var(--ink-700); margin:0;
+}
+@keyframes txbob{0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);}}
+@media(prefers-reduced-motion:reduce){ .tx-empty-mark{animation:none;} }

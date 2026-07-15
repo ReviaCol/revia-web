@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { ImageSlot } from "@/components/site/ImageSlot";
 import { RevealsBootstrap } from "@/components/site/RevealsBootstrap";
 import { getCatalog } from "@/lib/catalog";
 import {
-  TratamientosUX,
+  TratamientosExplorer,
   type CategoryId,
   type UxTreatment,
 } from "./_components/TratamientosUX";
@@ -18,16 +17,7 @@ export const metadata: Metadata = {
     "Portafolio completo de medicina estética y regenerativa, siempre no invasiva. Tratamientos faciales, corporales, capilares y antienvejecimiento.",
 };
 
-const CATEGORIES = [
-  { id: "corporal", n: "01", t: "Corporal", bg: "var(--terra)", tone: "warm" as const },
-  { id: "facial", n: "02", t: "Facial", bg: "var(--ink-900)", tone: "dark" as const },
-  { id: "capilar", n: "03", t: "Unidad Capilar", bg: "var(--ink-900)", tone: "dark" as const },
-  { id: "antiedad", n: "04", t: "Antienvejecimiento", bg: "var(--terra)", tone: "warm" as const },
-  { id: "longevidad", n: "05", t: "Longevidad", bg: "var(--turq-deep)", tone: "cool" as const, href: "/longevidad" },
-  { id: "complementarios", n: "06", t: "Complementarios", bg: "var(--ink-900)", tone: "dark" as const },
-];
-
-/** Mapea el id de categoría del catálogo (DB/JSON) → id de tab del menú UX. */
+/** Mapea el id de categoría del catálogo (DB/JSON) → id de tab del explorer. */
 const DB_TO_UX: Record<string, CategoryId> = {
   "no-invasivos-corporal": "corporal",
   "no-invasivos-facial": "facial",
@@ -38,11 +28,15 @@ const DB_TO_UX: Record<string, CategoryId> = {
 };
 
 /**
- * /tratamientos — sin page-hero ni "universos".
- * Entra directo en las cards de categorías (cinematográficas) y luego el
- * menú UX con tabs + cards. (El concepto "Universos" fue retirado.)
+ * /tratamientos — selector unificado (ADR 0019).
  *
- * El menú UX se alimenta de getCatalog() (Supabase con fallback al JSON): una
+ * Toda la parte interactiva (hero cards de categoría + menú con doble eje de
+ * filtro + grilla) vive en <TratamientosExplorer>, un único client component
+ * que posee el estado. Antes las hero cards eran anclas desconectadas del menú
+ * y saltaban a un destino tapado por el nav; ahora fijan el filtro y hacen
+ * scroll suave con offset. Entrada guiada: la grilla aparece al elegir.
+ *
+ * El catálogo se alimenta de getCatalog() (Supabase con fallback al JSON): una
  * sola fuente, sin lista hardcodeada (CMS Fase 1, ADR 0014).
  */
 export default async function TratamientosPage() {
@@ -65,79 +59,7 @@ export default async function TratamientosPage() {
       <RevealsBootstrap />
 
       <main id="contenido">
-        {/* CATEGORÍAS — entrada de la página, padding-top compensa nav */}
-        <section
-          className="sec-tight"
-          aria-label="Categorías de tratamientos"
-          style={{ paddingTop: "calc(var(--nav-h) + clamp(32px,4vw,56px))" }}
-        >
-          <div className="wrap">
-            <div className="sec-head" style={{ marginBottom: "clamp(24px,3vw,40px)" }}>
-              <p className="eyebrow" data-rev="up">Tratamientos</p>
-              <h2 data-rev="wipe" data-delay="100">
-                Activamos lo que <em>ya eres</em>.
-              </h2>
-              <p
-                className="body"
-                data-rev="up"
-                data-delay="220"
-                style={{
-                  maxWidth: "620px",
-                  fontSize: "17px",
-                  lineHeight: 1.7,
-                  color: "var(--ink-700)",
-                  marginTop: "24px",
-                }}
-              >
-                Un portafolio completo de medicina estética y regenerativa,
-                siempre no invasiva. Elige por dónde empezar.
-              </p>
-            </div>
-
-            <div className="cards6">
-              {CATEGORIES.map((c, i) => {
-                const href = c.href ?? `#${c.id}`;
-                return (
-                  <Link
-                    key={c.id}
-                    className="tcard"
-                    href={href}
-                    style={{ background: c.bg }}
-                    data-rev="img"
-                    data-delay={i ? String(i * 80) : undefined}
-                  >
-                    <ImageSlot slot={`cat-${c.id === "antiedad" ? "antiedad" : c.id}`} alt={c.t} tone={c.tone} />
-                    <div
-                      className="veil"
-                      style={
-                        c.tone === "cool"
-                          ? { background: "linear-gradient(180deg,rgba(20,55,58,.22),rgba(20,55,58,.92))" }
-                          : undefined
-                      }
-                    />
-                    <div className="tc-in">
-                      <h3>{c.t}</h3>
-                    </div>
-                    <span className="tc-num">{c.n}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* MENÚ COMPLETO — cards UX con tabs por categoría */}
-        <section className="sec cream2" aria-label="Menú completo">
-          <div className="wrap">
-            <div className="sec-head" style={{ marginBottom: "clamp(20px,2.4vw,32px)" }}>
-              <p className="eyebrow" data-rev="up">El menú completo</p>
-              <h2 data-rev="wipe" data-delay="100" style={{ fontSize: "clamp(28px,3.4vw,48px)" }}>
-                Cada tratamiento, una forma de <em>revelarte</em>.
-              </h2>
-            </div>
-            <TratamientosUX treatments={uxTreatments} />
-          </div>
-        </section>
+        <TratamientosExplorer treatments={uxTreatments} />
 
         {/* CLOSING */}
         <section className="closing warm" data-screen-label="Tratamientos · Cierre">
